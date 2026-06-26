@@ -1,0 +1,2039 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sorteador Inteligente</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --surface-2: #eef3f8;
+      --surface-3: #e2ebf4;
+      --ink: #172033;
+      --muted: #607085;
+      --line: #d9e1ea;
+      --line-strong: #c5d0dc;
+      --brand: #0f766e;
+      --brand-dark: #0a5e58;
+      --brand-soft: #d9f3ef;
+      --amber: #b7791f;
+      --amber-soft: #fff1cc;
+      --rose: #c2415b;
+      --rose-soft: #ffe4e9;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --shadow: 0 18px 50px rgba(25, 42, 70, 0.12);
+      --radius: 8px;
+      --radius-sm: 6px;
+      --focus: 0 0 0 4px rgba(15, 118, 110, 0.18);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      background: var(--bg);
+      color: var(--ink);
+      letter-spacing: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        linear-gradient(135deg, rgba(15, 118, 110, 0.08), transparent 38%),
+        linear-gradient(315deg, rgba(37, 99, 235, 0.08), transparent 34%),
+        var(--bg);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .app-shell {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 28px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 0 18px;
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 48px;
+      height: 48px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, #0f766e, #1d4ed8);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(15, 118, 110, 0.26);
+    }
+
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .brand-copy h1 {
+      margin: 0;
+      font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2.1rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .brand-copy p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.35;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(330px, 0.65fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel,
+    .result-panel,
+    .history-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      overflow: clip;
+    }
+
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-2);
+    }
+
+    .tab-button {
+      display: flex;
+      min-height: 58px;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 16px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .tab-button[aria-selected="true"] {
+      background: var(--surface);
+      color: var(--brand-dark);
+      box-shadow: inset 0 -3px 0 var(--brand);
+    }
+
+    .tab-button:focus-visible,
+    .icon-button:focus-visible,
+    .primary-button:focus-visible,
+    .secondary-button:focus-visible,
+    .ghost-button:focus-visible,
+    .chip-button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    .form-body {
+      padding: 20px;
+    }
+
+    .mode-view {
+      display: none;
+    }
+
+    .mode-view.active {
+      display: block;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-title h2,
+    .section-title h3 {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.2;
+    }
+
+    .section-title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .field label,
+    .field .label {
+      color: #2b3748;
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .field small {
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .input,
+    .textarea {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      color: var(--ink);
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .input {
+      min-height: 44px;
+      padding: 10px 12px;
+    }
+
+    .textarea {
+      min-height: 220px;
+      resize: vertical;
+      padding: 12px;
+      line-height: 1.45;
+    }
+
+    .input:hover,
+    .textarea:hover {
+      border-color: #aab7c6;
+    }
+
+    .grid-2,
+    .grid-3 {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin: 12px 0 16px;
+    }
+
+    .primary-button,
+    .secondary-button,
+    .ghost-button,
+    .chip-button,
+    .icon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      border-radius: var(--radius-sm);
+      font-weight: 850;
+      line-height: 1;
+      transition: transform 140ms ease, background 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+      white-space: nowrap;
+    }
+
+    .primary-button {
+      min-height: 48px;
+      padding: 0 18px;
+      background: var(--brand);
+      color: #fff;
+      box-shadow: 0 14px 28px rgba(15, 118, 110, 0.2);
+    }
+
+    .primary-button:hover {
+      background: var(--brand-dark);
+      transform: translateY(-1px);
+    }
+
+    .secondary-button {
+      padding: 0 14px;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      color: #243245;
+    }
+
+    .secondary-button:hover {
+      border-color: var(--brand);
+      color: var(--brand-dark);
+      transform: translateY(-1px);
+    }
+
+    .ghost-button {
+      padding: 0 12px;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .ghost-button:hover {
+      background: var(--surface-2);
+      color: var(--ink);
+    }
+
+    .chip-button {
+      min-height: 34px;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      color: #324258;
+      font-size: 0.86rem;
+    }
+
+    .chip-button.active {
+      border-color: rgba(15, 118, 110, 0.45);
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+    }
+
+    .icon-button {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+    }
+
+    .icon-button:hover {
+      border-color: var(--brand);
+      color: var(--brand-dark);
+      transform: translateY(-1px);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 4px;
+    }
+
+    .button-row .left,
+    .button-row .right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .switch-grid {
+      display: grid;
+      gap: 10px;
+      margin: 8px 0 16px;
+    }
+
+    .switch {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 11px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+    }
+
+    .switch input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--brand);
+      margin: 1px 0 0;
+    }
+
+    .switch strong {
+      display: block;
+      font-size: 0.92rem;
+    }
+
+    .switch span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .insight-bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin: 14px 0 18px;
+    }
+
+    .metric {
+      min-height: 78px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 1.42rem;
+      line-height: 1;
+    }
+
+    .alert-stack {
+      display: grid;
+      gap: 8px;
+      margin: 10px 0 16px;
+    }
+
+    .alert {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      color: #324258;
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    .alert.info {
+      border-color: #bfdbfe;
+      background: var(--blue-soft);
+    }
+
+    .alert.warn {
+      border-color: #f4d38d;
+      background: var(--amber-soft);
+    }
+
+    .alert.error {
+      border-color: #fecdd6;
+      background: var(--rose-soft);
+    }
+
+    .side-column {
+      display: grid;
+      gap: 18px;
+    }
+
+    .result-panel,
+    .history-panel {
+      padding: 18px;
+    }
+
+    .result-stage {
+      display: grid;
+      min-height: 330px;
+      align-content: center;
+      gap: 16px;
+    }
+
+    .idle-visual {
+      display: grid;
+      place-items: center;
+      gap: 15px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .ticket-stack {
+      position: relative;
+      width: 132px;
+      height: 94px;
+    }
+
+    .ticket {
+      position: absolute;
+      inset: 12px 6px;
+      border: 1px solid rgba(15, 118, 110, 0.26);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: 0 16px 36px rgba(24, 42, 70, 0.12);
+    }
+
+    .ticket::before,
+    .ticket::after {
+      position: absolute;
+      top: 35px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--bg);
+      content: "";
+    }
+
+    .ticket::before {
+      left: -9px;
+    }
+
+    .ticket::after {
+      right: -9px;
+    }
+
+    .ticket.one {
+      transform: rotate(-8deg) translate(-8px, 2px);
+      background: #f8fafc;
+    }
+
+    .ticket.two {
+      transform: rotate(6deg) translate(8px, 3px);
+      background: #edf7ff;
+    }
+
+    .ticket.three {
+      display: grid;
+      place-items: center;
+      transform: rotate(0deg);
+      background:
+        linear-gradient(90deg, transparent 0 26%, rgba(15, 118, 110, 0.18) 26% 27%, transparent 27%),
+        #ffffff;
+      color: var(--brand);
+    }
+
+    .ticket-lines {
+      width: 62%;
+      display: grid;
+      gap: 7px;
+      margin-left: 20px;
+    }
+
+    .ticket-lines i {
+      display: block;
+      height: 6px;
+      border-radius: 999px;
+      background: #bdd7d2;
+    }
+
+    .ticket-lines i:nth-child(2) {
+      width: 72%;
+      background: #cbd5e1;
+    }
+
+    .ticket-lines i:nth-child(3) {
+      width: 54%;
+      background: #bfdbfe;
+    }
+
+    .draw-animation {
+      display: none;
+      place-items: center;
+      gap: 16px;
+      text-align: center;
+    }
+
+    .draw-animation.active {
+      display: grid;
+    }
+
+    .spinner-card {
+      display: grid;
+      width: min(100%, 290px);
+      min-height: 132px;
+      place-items: center;
+      padding: 16px;
+      border: 1px solid rgba(15, 118, 110, 0.25);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, #ffffff, #eefbf8);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 16px 35px rgba(15, 118, 110, 0.15);
+      overflow: hidden;
+    }
+
+    .rolling-name {
+      width: 100%;
+      min-height: 52px;
+      display: grid;
+      place-items: center;
+      color: var(--brand-dark);
+      font-size: clamp(1.35rem, 1.1rem + 1vw, 2rem);
+      font-weight: 900;
+      line-height: 1.05;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .result-content {
+      display: none;
+      gap: 14px;
+    }
+
+    .result-content.active {
+      display: grid;
+    }
+
+    .result-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      min-height: 28px;
+      align-items: center;
+      gap: 7px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: #3b4b61;
+      font-size: 0.78rem;
+      font-weight: 850;
+    }
+
+    .pill.success {
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+    }
+
+    .winner-spotlight {
+      display: grid;
+      gap: 8px;
+      padding: 18px;
+      border: 1px solid rgba(15, 118, 110, 0.25);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, #ecfdf7, #ffffff);
+    }
+
+    .winner-spotlight span {
+      color: var(--brand-dark);
+      font-size: 0.78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .winner-spotlight strong {
+      font-size: clamp(1.7rem, 1.3rem + 1.5vw, 2.55rem);
+      line-height: 1.06;
+      overflow-wrap: anywhere;
+    }
+
+    .rank-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .rank-item {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-height: 50px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: #fff;
+    }
+
+    .rank-number {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .rank-item strong {
+      overflow-wrap: anywhere;
+      line-height: 1.2;
+    }
+
+    .rank-item small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+    }
+
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 9px;
+      max-height: 380px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .history-item {
+      display: grid;
+      gap: 7px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: #fff;
+    }
+
+    .history-item button {
+      justify-content: flex-start;
+      min-height: auto;
+      padding: 0;
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      font-weight: 900;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    .history-item button:hover {
+      color: var(--brand-dark);
+    }
+
+    .history-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .empty {
+      display: grid;
+      min-height: 120px;
+      place-items: center;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      text-align: center;
+      padding: 18px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 20;
+      display: grid;
+      gap: 8px;
+      width: min(360px, calc(100% - 36px));
+      pointer-events: none;
+    }
+
+    .toast-message {
+      padding: 12px 14px;
+      border: 1px solid rgba(15, 118, 110, 0.22);
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      box-shadow: var(--shadow);
+      color: #26364a;
+      font-weight: 800;
+      animation: rise 260ms ease both;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    svg {
+      width: 19px;
+      height: 19px;
+      flex: 0 0 auto;
+      stroke-width: 2.2;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 930px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .side-column {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .app-shell {
+        width: min(100% - 18px, 1180px);
+        padding-top: 12px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 44px;
+        justify-content: stretch;
+      }
+
+      .button-row .left,
+      .button-row .right,
+      .button-row .primary-button,
+      .button-row .secondary-button,
+      .button-row .ghost-button,
+      .result-actions > * {
+        width: 100%;
+      }
+
+      .top-actions > .secondary-button {
+        width: 100%;
+      }
+
+      .top-actions > .icon-button {
+        width: 44px;
+      }
+
+      .button-row,
+      .button-row .left,
+      .button-row .right,
+      .result-actions {
+        align-items: stretch;
+      }
+
+      .grid-2,
+      .grid-3,
+      .insight-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .form-body,
+      .result-panel,
+      .history-panel {
+        padding: 14px;
+      }
+
+      .tab-button {
+        min-height: 54px;
+        padding: 10px 8px;
+        font-size: 0.92rem;
+      }
+
+      .brand-mark {
+        width: 44px;
+        height: 44px;
+      }
+
+      .textarea {
+        min-height: 190px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M4 7h16"></path>
+            <path d="M5 7l1.3 13h11.4L19 7"></path>
+            <path d="M9 7a3 3 0 0 1 6 0"></path>
+            <path d="M8.5 12h7"></path>
+            <path d="M9.5 16h5"></path>
+          </svg>
+        </div>
+        <div class="brand-copy">
+          <h1>Sorteador Inteligente</h1>
+          <p>Por nomes ou números, com validação automática e comprovante do resultado.</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="secondary-button" type="button" id="exampleButton">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M12 3v18"></path>
+            <path d="M5 8h14"></path>
+            <path d="M7 16h10"></path>
+          </svg>
+          Preencher exemplo
+        </button>
+        <button class="icon-button" type="button" id="resetAllButton" title="Limpar tela" aria-label="Limpar tela">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path d="M3 6h18"></path>
+            <path d="M8 6V4h8v2"></path>
+            <path d="M6 6l1 15h10l1-15"></path>
+            <path d="M10 11v6"></path>
+            <path d="M14 11v6"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel" aria-label="Configurar sorteio">
+        <div class="mode-tabs" role="tablist" aria-label="Tipo de sorteio">
+          <button class="tab-button" type="button" role="tab" aria-selected="true" aria-controls="namesMode" id="tabNames" data-mode="names">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Nomes
+          </button>
+          <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="numbersMode" id="tabNumbers" data-mode="numbers">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <path d="M4 7h16"></path>
+              <path d="M4 12h16"></path>
+              <path d="M4 17h16"></path>
+              <path d="M9 4 7 20"></path>
+              <path d="M17 4l-2 16"></path>
+            </svg>
+            Números
+          </button>
+        </div>
+
+        <div class="form-body">
+          <div id="namesMode" class="mode-view active" role="tabpanel" aria-labelledby="tabNames">
+            <div class="section-title">
+              <div>
+                <h2>Lista de participantes</h2>
+                <p>Cole um nome por linha ou importe um arquivo de texto/CSV.</p>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="namesInput">Participantes</label>
+              <textarea class="textarea" id="namesInput" spellcheck="false" placeholder="Ana Silva&#10;Bruno Martins&#10;Carla Souza&#10;Diego Lima"></textarea>
+              <small>O sistema ignora linhas vazias e espaços extras. Duplicados podem ser removidos automaticamente.</small>
+            </div>
+
+            <div class="toolbar">
+              <button class="secondary-button" type="button" id="importButton">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path d="M12 3v12"></path>
+                  <path d="m7 10 5 5 5-5"></path>
+                  <path d="M5 21h14"></path>
+                </svg>
+                Importar lista
+              </button>
+              <input class="visually-hidden" id="fileInput" type="file" accept=".txt,.csv,text/plain,text/csv">
+              <button class="secondary-button" type="button" id="sortNamesButton">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path d="m21 16-4 4-4-4"></path>
+                  <path d="M17 20V4"></path>
+                  <path d="m3 8 4-4 4 4"></path>
+                  <path d="M7 4v16"></path>
+                </svg>
+                Ordenar A-Z
+              </button>
+              <button class="secondary-button" type="button" id="cleanNamesButton">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path d="M4 7h16"></path>
+                  <path d="M10 11v6"></path>
+                  <path d="M14 11v6"></path>
+                  <path d="M6 7l1 14h10l1-14"></path>
+                  <path d="M9 7V4h6v3"></path>
+                </svg>
+                Limpar duplicados
+              </button>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label for="nameWinnerCount">Ganhadores</label>
+                <input class="input" id="nameWinnerCount" type="number" min="1" max="9999" value="1">
+              </div>
+              <div class="field">
+                <label for="nameAlternateCount">Suplentes</label>
+                <input class="input" id="nameAlternateCount" type="number" min="0" max="9999" value="0">
+              </div>
+            </div>
+
+            <div class="switch-grid">
+              <label class="switch" for="dedupeNames">
+                <input id="dedupeNames" type="checkbox" checked>
+                <span>
+                  <strong>Remover duplicados antes do sorteio</strong>
+                  <span>Compara nomes sem diferenciar maiúsculas, minúsculas e acentos.</span>
+                </span>
+              </label>
+              <label class="switch" for="caseSmartNames">
+                <input id="caseSmartNames" type="checkbox" checked>
+                <span>
+                  <strong>Padronizar visual dos nomes</strong>
+                  <span>Mostra nomes em formato de título no resultado e no comprovante.</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="insight-bar" aria-live="polite">
+              <div class="metric">
+                <span>Linhas úteis</span>
+                <strong id="rawNameCount">0</strong>
+              </div>
+              <div class="metric">
+                <span>Válidos</span>
+                <strong id="validNameCount">0</strong>
+              </div>
+              <div class="metric">
+                <span>Duplicados</span>
+                <strong id="duplicateNameCount">0</strong>
+              </div>
+              <div class="metric">
+                <span>Serão sorteados</span>
+                <strong id="requestedNameCount">1</strong>
+              </div>
+            </div>
+
+            <div class="alert-stack" id="nameAlerts"></div>
+
+            <div class="button-row">
+              <div class="left">
+                <button class="primary-button" type="button" id="drawNamesButton">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path d="M5 3v4"></path>
+                    <path d="M19 17v4"></path>
+                    <path d="M3 5h4"></path>
+                    <path d="M17 19h4"></path>
+                    <path d="m7 17 10-10"></path>
+                    <path d="m14 7 3 3"></path>
+                    <path d="m7 14 3 3"></path>
+                  </svg>
+                  Sortear nomes
+                </button>
+              </div>
+              <div class="right">
+                <button class="ghost-button" type="button" id="clearNamesButton">Limpar lista</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="numbersMode" class="mode-view" role="tabpanel" aria-labelledby="tabNumbers">
+            <div class="section-title">
+              <div>
+                <h2>Intervalo numérico</h2>
+                <p>Defina a faixa, exclusões e quantidade sem repetição.</p>
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div class="field">
+                <label for="minNumber">Número inicial</label>
+                <input class="input" id="minNumber" type="number" value="1">
+              </div>
+              <div class="field">
+                <label for="maxNumber">Número final</label>
+                <input class="input" id="maxNumber" type="number" value="100">
+              </div>
+              <div class="field">
+                <label for="numberWinnerCount">Quantidade</label>
+                <input class="input" id="numberWinnerCount" type="number" min="1" value="1">
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label for="numberAlternateCount">Suplentes</label>
+                <input class="input" id="numberAlternateCount" type="number" min="0" value="0">
+              </div>
+              <div class="field">
+                <label for="numberPadding">Casas no resultado</label>
+                <input class="input" id="numberPadding" type="number" min="0" max="12" value="0">
+                <small>Use 3 para mostrar 007, 042, 100.</small>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="excludedNumbers">Excluir números</label>
+              <textarea class="textarea" id="excludedNumbers" placeholder="13, 22, 89&#10;ou um número por linha"></textarea>
+              <small>Separe por vírgula, espaço ou linha. Números fora da faixa são ignorados.</small>
+            </div>
+
+            <div class="toolbar" aria-label="Atalhos de intervalo">
+              <button class="chip-button" type="button" data-range="1,50">1 a 50</button>
+              <button class="chip-button" type="button" data-range="1,100">1 a 100</button>
+              <button class="chip-button" type="button" data-range="1,1000">1 a 1000</button>
+            </div>
+
+            <div class="insight-bar" aria-live="polite">
+              <div class="metric">
+                <span>Na faixa</span>
+                <strong id="rangeCount">100</strong>
+              </div>
+              <div class="metric">
+                <span>Excluídos</span>
+                <strong id="excludedCount">0</strong>
+              </div>
+              <div class="metric">
+                <span>Disponíveis</span>
+                <strong id="availableNumberCount">100</strong>
+              </div>
+              <div class="metric">
+                <span>Serão sorteados</span>
+                <strong id="requestedNumberCount">1</strong>
+              </div>
+            </div>
+
+            <div class="alert-stack" id="numberAlerts"></div>
+
+            <div class="button-row">
+              <div class="left">
+                <button class="primary-button" type="button" id="drawNumbersButton">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path d="M12 2v4"></path>
+                    <path d="M12 18v4"></path>
+                    <path d="m4.93 4.93 2.83 2.83"></path>
+                    <path d="m16.24 16.24 2.83 2.83"></path>
+                    <path d="M2 12h4"></path>
+                    <path d="M18 12h4"></path>
+                    <path d="m4.93 19.07 2.83-2.83"></path>
+                    <path d="m16.24 7.76 2.83-2.83"></path>
+                  </svg>
+                  Sortear números
+                </button>
+              </div>
+              <div class="right">
+                <button class="ghost-button" type="button" id="clearNumbersButton">Limpar exclusões</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-column">
+        <section class="result-panel" aria-label="Resultado do sorteio">
+          <div class="section-title">
+            <div>
+              <h2>Resultado</h2>
+              <p id="resultSubtitle">Configure e execute um sorteio.</p>
+            </div>
+          </div>
+
+          <div class="result-stage">
+            <div class="idle-visual" id="idleState">
+              <div class="ticket-stack" aria-hidden="true">
+                <div class="ticket one"></div>
+                <div class="ticket two"></div>
+                <div class="ticket three">
+                  <div class="ticket-lines">
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                  </div>
+                </div>
+              </div>
+              <p>Nenhum sorteio feito ainda.</p>
+            </div>
+
+            <div class="draw-animation" id="drawAnimation" aria-live="polite">
+              <div class="spinner-card">
+                <div class="rolling-name" id="rollingName">Sorteando...</div>
+              </div>
+              <strong>Embaralhando com aleatoriedade segura</strong>
+            </div>
+
+            <div class="result-content" id="resultContent">
+              <div class="result-meta" id="resultMeta"></div>
+              <div class="winner-spotlight">
+                <span>Primeiro resultado</span>
+                <strong id="mainWinner">-</strong>
+              </div>
+              <div id="winnerBlock">
+                <div class="section-title">
+                  <h3>Ganhadores</h3>
+                </div>
+                <ol class="rank-list" id="winnerList"></ol>
+              </div>
+              <div id="alternateBlock" class="hidden">
+                <div class="section-title">
+                  <h3>Suplentes</h3>
+                </div>
+                <ol class="rank-list" id="alternateList"></ol>
+              </div>
+              <div class="result-actions">
+                <button class="secondary-button" type="button" id="copyResultButton">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  Copiar
+                </button>
+                <button class="secondary-button" type="button" id="downloadResultButton">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path d="M12 3v12"></path>
+                    <path d="m7 10 5 5 5-5"></path>
+                    <path d="M5 21h14"></path>
+                  </svg>
+                  Baixar comprovante
+                </button>
+                <button class="ghost-button" type="button" id="newDrawButton">Novo sorteio</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="history-panel" aria-label="Histórico">
+          <div class="section-title">
+            <div>
+              <h2>Histórico</h2>
+              <p>Últimos sorteios salvos neste navegador.</p>
+            </div>
+            <button class="icon-button" type="button" id="clearHistoryButton" title="Limpar histórico" aria-label="Limpar histórico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M3 6h18"></path>
+                <path d="M8 6V4h8v2"></path>
+                <path d="M6 6l1 15h10l1-15"></path>
+                <path d="M10 11v6"></path>
+                <path d="M14 11v6"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    const els = {
+      tabs: Array.from(document.querySelectorAll(".tab-button")),
+      namesMode: document.getElementById("namesMode"),
+      numbersMode: document.getElementById("numbersMode"),
+      namesInput: document.getElementById("namesInput"),
+      fileInput: document.getElementById("fileInput"),
+      importButton: document.getElementById("importButton"),
+      sortNamesButton: document.getElementById("sortNamesButton"),
+      cleanNamesButton: document.getElementById("cleanNamesButton"),
+      clearNamesButton: document.getElementById("clearNamesButton"),
+      nameWinnerCount: document.getElementById("nameWinnerCount"),
+      nameAlternateCount: document.getElementById("nameAlternateCount"),
+      dedupeNames: document.getElementById("dedupeNames"),
+      caseSmartNames: document.getElementById("caseSmartNames"),
+      rawNameCount: document.getElementById("rawNameCount"),
+      validNameCount: document.getElementById("validNameCount"),
+      duplicateNameCount: document.getElementById("duplicateNameCount"),
+      requestedNameCount: document.getElementById("requestedNameCount"),
+      nameAlerts: document.getElementById("nameAlerts"),
+      drawNamesButton: document.getElementById("drawNamesButton"),
+      minNumber: document.getElementById("minNumber"),
+      maxNumber: document.getElementById("maxNumber"),
+      numberWinnerCount: document.getElementById("numberWinnerCount"),
+      numberAlternateCount: document.getElementById("numberAlternateCount"),
+      numberPadding: document.getElementById("numberPadding"),
+      excludedNumbers: document.getElementById("excludedNumbers"),
+      rangeCount: document.getElementById("rangeCount"),
+      excludedCount: document.getElementById("excludedCount"),
+      availableNumberCount: document.getElementById("availableNumberCount"),
+      requestedNumberCount: document.getElementById("requestedNumberCount"),
+      numberAlerts: document.getElementById("numberAlerts"),
+      drawNumbersButton: document.getElementById("drawNumbersButton"),
+      clearNumbersButton: document.getElementById("clearNumbersButton"),
+      rangeButtons: Array.from(document.querySelectorAll("[data-range]")),
+      exampleButton: document.getElementById("exampleButton"),
+      resetAllButton: document.getElementById("resetAllButton"),
+      idleState: document.getElementById("idleState"),
+      drawAnimation: document.getElementById("drawAnimation"),
+      rollingName: document.getElementById("rollingName"),
+      resultContent: document.getElementById("resultContent"),
+      resultSubtitle: document.getElementById("resultSubtitle"),
+      resultMeta: document.getElementById("resultMeta"),
+      mainWinner: document.getElementById("mainWinner"),
+      winnerList: document.getElementById("winnerList"),
+      alternateBlock: document.getElementById("alternateBlock"),
+      alternateList: document.getElementById("alternateList"),
+      copyResultButton: document.getElementById("copyResultButton"),
+      downloadResultButton: document.getElementById("downloadResultButton"),
+      newDrawButton: document.getElementById("newDrawButton"),
+      historyList: document.getElementById("historyList"),
+      clearHistoryButton: document.getElementById("clearHistoryButton"),
+      toast: document.getElementById("toast")
+    };
+
+    const STORAGE_KEY = "sorteador-inteligente-historico-v1";
+    let activeMode = "names";
+    let currentResult = null;
+    let history = loadHistory();
+    let rollingTimer = null;
+
+    function normalizeKey(value) {
+      return String(value)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLocaleLowerCase("pt-BR");
+    }
+
+    function titleCaseName(value) {
+      const lowercaseWords = new Set(["da", "das", "de", "do", "dos", "e"]);
+      return String(value)
+        .toLocaleLowerCase("pt-BR")
+        .split(" ")
+        .filter(Boolean)
+        .map((word, index) => {
+          if (index > 0 && lowercaseWords.has(word)) return word;
+          return word.charAt(0).toLocaleUpperCase("pt-BR") + word.slice(1);
+        })
+        .join(" ");
+    }
+
+    function asPositiveInt(value, fallback = 0) {
+      const parsed = Number.parseInt(value, 10);
+      if (!Number.isFinite(parsed)) return fallback;
+      return Math.max(0, parsed);
+    }
+
+    function asInteger(value, fallback = 0) {
+      const parsed = Number.parseInt(value, 10);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    }
+
+    function secureRandomInt(maxExclusive) {
+      if (maxExclusive <= 0) return 0;
+      if (window.crypto && window.crypto.getRandomValues) {
+        const limit = Math.floor(0x100000000 / maxExclusive) * maxExclusive;
+        const buffer = new Uint32Array(1);
+        let value = 0;
+        do {
+          window.crypto.getRandomValues(buffer);
+          value = buffer[0];
+        } while (value >= limit);
+        return value % maxExclusive;
+      }
+      return Math.floor(Math.random() * maxExclusive);
+    }
+
+    function shuffle(values) {
+      const result = values.slice();
+      for (let index = result.length - 1; index > 0; index -= 1) {
+        const swapIndex = secureRandomInt(index + 1);
+        [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+      }
+      return result;
+    }
+
+    function parseNames() {
+      const rawLines = els.namesInput.value
+        .split(/\r?\n/)
+        .map((line) => line.replace(/\s+/g, " ").trim())
+        .filter(Boolean);
+      const seen = new Map();
+      const duplicates = [];
+      const values = [];
+
+      rawLines.forEach((name) => {
+        const display = els.caseSmartNames.checked ? titleCaseName(name) : name;
+        const key = normalizeKey(name);
+        if (seen.has(key)) {
+          duplicates.push(display);
+          if (!els.dedupeNames.checked) values.push(display);
+          return;
+        }
+        seen.set(key, display);
+        values.push(display);
+      });
+
+      return {
+        rawLines,
+        values,
+        duplicates,
+        uniqueCount: seen.size
+      };
+    }
+
+    function parseExcludedNumbers(min, max) {
+      const tokens = els.excludedNumbers.value
+        .split(/[\s,;]+/)
+        .map((token) => token.trim())
+        .filter(Boolean);
+      const excluded = new Set();
+      const ignored = [];
+
+      tokens.forEach((token) => {
+        if (!/^-?\d+$/.test(token)) {
+          ignored.push(token);
+          return;
+        }
+        const number = Number.parseInt(token, 10);
+        if (!Number.isFinite(number)) {
+          ignored.push(token);
+          return;
+        }
+        if (number < min || number > max) {
+          ignored.push(token);
+          return;
+        }
+        excluded.add(number);
+      });
+
+      return { excluded, ignored };
+    }
+
+    function buildNumberPool() {
+      let min = asInteger(els.minNumber.value, 1);
+      let max = asInteger(els.maxNumber.value, 100);
+      const swapped = min > max;
+      if (swapped) [min, max] = [max, min];
+
+      const { excluded, ignored } = parseExcludedNumbers(min, max);
+      const pool = [];
+      const totalRange = max - min + 1;
+      const HARD_LIMIT = 200000;
+
+      if (totalRange > 0 && totalRange <= HARD_LIMIT) {
+        for (let number = min; number <= max; number += 1) {
+          if (!excluded.has(number)) pool.push(number);
+        }
+      }
+
+      return {
+        min,
+        max,
+        swapped,
+        totalRange: Math.max(0, totalRange),
+        excluded,
+        ignored,
+        pool,
+        hardLimit: HARD_LIMIT
+      };
+    }
+
+    function updateNameInsights() {
+      const parsed = parseNames();
+      const winners = asPositiveInt(els.nameWinnerCount.value, 1);
+      const alternates = asPositiveInt(els.nameAlternateCount.value, 0);
+      const requested = winners + alternates;
+      const available = parsed.values.length;
+      const alerts = [];
+
+      els.rawNameCount.textContent = parsed.rawLines.length;
+      els.validNameCount.textContent = available;
+      els.duplicateNameCount.textContent = parsed.duplicates.length;
+      els.requestedNameCount.textContent = requested;
+
+      if (parsed.rawLines.length === 0) {
+        alerts.push({ type: "info", text: "Adicione pelo menos um participante para começar." });
+      }
+      if (parsed.duplicates.length > 0 && els.dedupeNames.checked) {
+        alerts.push({ type: "warn", text: `${parsed.duplicates.length} duplicado(s) serão removidos automaticamente.` });
+      }
+      if (requested > available) {
+        alerts.push({ type: "error", text: `Você pediu ${requested} resultado(s), mas há apenas ${available} participante(s) disponível(is).` });
+      }
+      if (winners < 1) {
+        alerts.push({ type: "error", text: "A quantidade de ganhadores precisa ser pelo menos 1." });
+      }
+
+      renderAlerts(els.nameAlerts, alerts);
+      els.drawNamesButton.disabled = available < 1 || requested > available || winners < 1;
+    }
+
+    function updateNumberInsights() {
+      const data = buildNumberPool();
+      const winners = asPositiveInt(els.numberWinnerCount.value, 1);
+      const alternates = asPositiveInt(els.numberAlternateCount.value, 0);
+      const requested = winners + alternates;
+      const alerts = [];
+
+      els.rangeCount.textContent = data.totalRange > data.hardLimit ? `${data.hardLimit}+` : data.totalRange;
+      els.excludedCount.textContent = data.excluded.size;
+      els.availableNumberCount.textContent = data.totalRange > data.hardLimit ? "-" : data.pool.length;
+      els.requestedNumberCount.textContent = requested;
+
+      if (data.swapped) {
+        alerts.push({ type: "warn", text: "O inicial era maior que o final. A faixa foi interpretada automaticamente na ordem correta." });
+      }
+      if (data.totalRange <= 0) {
+        alerts.push({ type: "error", text: "Informe uma faixa numérica válida." });
+      }
+      if (data.totalRange > data.hardLimit) {
+        alerts.push({ type: "error", text: `A faixa é grande demais para esta versão local. Use até ${data.hardLimit.toLocaleString("pt-BR")} números.` });
+      }
+      if (data.ignored.length > 0) {
+        alerts.push({ type: "warn", text: `${data.ignored.length} item(ns) em exclusões foram ignorados por estarem fora da faixa ou não serem números.` });
+      }
+      if (requested > data.pool.length && data.totalRange <= data.hardLimit) {
+        alerts.push({ type: "error", text: `Você pediu ${requested} resultado(s), mas há apenas ${data.pool.length} número(s) disponível(is).` });
+      }
+      if (winners < 1) {
+        alerts.push({ type: "error", text: "A quantidade precisa ser pelo menos 1." });
+      }
+
+      renderAlerts(els.numberAlerts, alerts);
+      els.drawNumbersButton.disabled = data.totalRange <= 0 || data.totalRange > data.hardLimit || data.pool.length < 1 || requested > data.pool.length || winners < 1;
+    }
+
+    function renderAlerts(target, alerts) {
+      if (!alerts.length) {
+        target.innerHTML = "";
+        return;
+      }
+      target.innerHTML = alerts.map((alert) => `
+        <div class="alert ${alert.type}">
+          ${alertIcon(alert.type)}
+          <span>${escapeHtml(alert.text)}</span>
+        </div>
+      `).join("");
+    }
+
+    function alertIcon(type) {
+      if (type === "error") {
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v5"></path><path d="M12 16h.01"></path></svg>`;
+      }
+      if (type === "warn") {
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m12 3 10 18H2L12 3Z"></path><path d="M12 9v5"></path><path d="M12 17h.01"></path></svg>`;
+      }
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function setMode(mode) {
+      activeMode = mode;
+      els.tabs.forEach((tab) => {
+        const selected = tab.dataset.mode === mode;
+        tab.setAttribute("aria-selected", String(selected));
+      });
+      els.namesMode.classList.toggle("active", mode === "names");
+      els.numbersMode.classList.toggle("active", mode === "numbers");
+      updateAllInsights();
+    }
+
+    function drawNames() {
+      const parsed = parseNames();
+      const winnerCount = asPositiveInt(els.nameWinnerCount.value, 1);
+      const alternateCount = asPositiveInt(els.nameAlternateCount.value, 0);
+      const requested = winnerCount + alternateCount;
+      if (requested > parsed.values.length || winnerCount < 1) return;
+
+      const shuffled = shuffle(parsed.values);
+      const winners = shuffled.slice(0, winnerCount);
+      const alternates = shuffled.slice(winnerCount, requested);
+      const result = createResult({
+        mode: "names",
+        winners,
+        alternates,
+        poolSize: parsed.values.length,
+        duplicateCount: parsed.duplicates.length,
+        parameters: {
+          ganhadores: winnerCount,
+          suplentes: alternateCount,
+          duplicadosRemovidos: els.dedupeNames.checked,
+          nomesPadronizados: els.caseSmartNames.checked
+        }
+      });
+
+      revealResult(result, parsed.values);
+    }
+
+    function drawNumbers() {
+      const data = buildNumberPool();
+      const winnerCount = asPositiveInt(els.numberWinnerCount.value, 1);
+      const alternateCount = asPositiveInt(els.numberAlternateCount.value, 0);
+      const requested = winnerCount + alternateCount;
+      if (requested > data.pool.length || winnerCount < 1) return;
+
+      const padding = Math.min(12, asPositiveInt(els.numberPadding.value, 0));
+      const shuffled = shuffle(data.pool);
+      const format = (number) => padding > 0 ? String(number).padStart(padding, "0") : String(number);
+      const winners = shuffled.slice(0, winnerCount).map(format);
+      const alternates = shuffled.slice(winnerCount, requested).map(format);
+      const result = createResult({
+        mode: "numbers",
+        winners,
+        alternates,
+        poolSize: data.pool.length,
+        duplicateCount: 0,
+        parameters: {
+          inicial: data.min,
+          final: data.max,
+          quantidade: winnerCount,
+          suplentes: alternateCount,
+          excluidos: data.excluded.size,
+          casas: padding
+        }
+      });
+
+      revealResult(result, data.pool.map(format));
+    }
+
+    function createResult({ mode, winners, alternates, poolSize, duplicateCount, parameters }) {
+      const createdAt = new Date();
+      return {
+        id: makeId(createdAt),
+        mode,
+        label: mode === "names" ? "Sorteio por nomes" : "Sorteio por números",
+        createdAt: createdAt.toISOString(),
+        winners,
+        alternates,
+        poolSize,
+        duplicateCount,
+        parameters,
+        engine: window.crypto && window.crypto.getRandomValues ? "crypto.getRandomValues" : "Math.random"
+      };
+    }
+
+    function makeId(date) {
+      const stamp = date.toISOString().replace(/\D/g, "").slice(0, 14);
+      const random = Array.from({ length: 4 }, () => secureRandomInt(36).toString(36).toUpperCase()).join("");
+      return `SRT-${stamp}-${random}`;
+    }
+
+    function revealResult(result, poolForAnimation) {
+      currentResult = result;
+      els.idleState.classList.add("hidden");
+      els.resultContent.classList.remove("active");
+      els.drawAnimation.classList.add("active");
+      setDrawButtonsDisabled(true);
+
+      const samples = poolForAnimation.length ? poolForAnimation : result.winners;
+      let ticks = 0;
+      clearInterval(rollingTimer);
+      rollingTimer = setInterval(() => {
+        ticks += 1;
+        els.rollingName.textContent = samples[secureRandomInt(samples.length)] || "Sorteando...";
+        if (ticks > 18) {
+          clearInterval(rollingTimer);
+          els.rollingName.textContent = result.winners[0];
+          setTimeout(() => {
+            els.drawAnimation.classList.remove("active");
+            renderResult(result);
+            saveResult(result);
+            setDrawButtonsDisabled(false);
+            showToast("Sorteio concluído e salvo no histórico.");
+          }, 280);
+        }
+      }, 78);
+    }
+
+    function setDrawButtonsDisabled(disabled) {
+      els.drawNamesButton.disabled = disabled || els.drawNamesButton.disabled;
+      els.drawNumbersButton.disabled = disabled || els.drawNumbersButton.disabled;
+      if (!disabled) updateAllInsights();
+    }
+
+    function renderResult(result) {
+      currentResult = result;
+      els.idleState.classList.add("hidden");
+      els.drawAnimation.classList.remove("active");
+      els.resultContent.classList.add("active");
+      els.resultSubtitle.textContent = `${result.label} executado em ${formatDate(result.createdAt)}.`;
+      els.mainWinner.textContent = result.winners[0] || "-";
+      els.resultMeta.innerHTML = `
+        <span class="pill success">${escapeHtml(result.id)}</span>
+        <span class="pill">${escapeHtml(result.label)}</span>
+        <span class="pill">${result.poolSize} disponíveis</span>
+      `;
+      els.winnerList.innerHTML = result.winners.map((winner, index) => rankItem(index + 1, winner, "Ganhador")).join("");
+      els.alternateList.innerHTML = result.alternates.map((alternate, index) => rankItem(index + 1, alternate, "Suplente")).join("");
+      els.alternateBlock.classList.toggle("hidden", result.alternates.length === 0);
+    }
+
+    function rankItem(position, value, label) {
+      return `
+        <li class="rank-item">
+          <span class="rank-number">${position}</span>
+          <span>
+            <strong>${escapeHtml(value)}</strong>
+            <small>${label}</small>
+          </span>
+        </li>
+      `;
+    }
+
+    function formatDate(value) {
+      return new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "medium"
+      }).format(new Date(value));
+    }
+
+    function resultToText(result) {
+      const parameters = Object.entries(result.parameters)
+        .map(([key, value]) => `- ${key}: ${value}`)
+        .join("\n");
+      const winners = result.winners.map((winner, index) => `${index + 1}. ${winner}`).join("\n");
+      const alternates = result.alternates.length
+        ? `\n\nSuplentes\n${result.alternates.map((alternate, index) => `${index + 1}. ${alternate}`).join("\n")}`
+        : "";
+
+      return [
+        "COMPROVANTE DE SORTEIO",
+        "",
+        `ID: ${result.id}`,
+        `Tipo: ${result.label}`,
+        `Data e hora: ${formatDate(result.createdAt)}`,
+        `Motor aleatório: ${result.engine}`,
+        `Total disponível: ${result.poolSize}`,
+        "",
+        "Parâmetros",
+        parameters,
+        "",
+        "Ganhadores",
+        winners,
+        alternates
+      ].join("\n");
+    }
+
+    async function copyCurrentResult() {
+      if (!currentResult) return;
+      const text = resultToText(currentResult);
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast("Resultado copiado.");
+      } catch (error) {
+        const helper = document.createElement("textarea");
+        helper.value = text;
+        document.body.appendChild(helper);
+        helper.select();
+        document.execCommand("copy");
+        helper.remove();
+        showToast("Resultado copiado.");
+      }
+    }
+
+    function downloadCurrentResult() {
+      if (!currentResult) return;
+      const blob = new Blob([resultToText(currentResult)], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${currentResult.id.toLowerCase()}-comprovante.txt`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast("Comprovante gerado.");
+    }
+
+    function loadHistory() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveResult(result) {
+      history = [result, ...history.filter((item) => item.id !== result.id)].slice(0, 20);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      if (!history.length) {
+        els.historyList.innerHTML = `<div class="empty">Seu histórico aparecerá aqui depois do primeiro sorteio.</div>`;
+        return;
+      }
+      els.historyList.innerHTML = history.map((item) => `
+        <article class="history-item">
+          <button type="button" data-history-id="${escapeHtml(item.id)}">${escapeHtml(item.winners[0] || item.id)}</button>
+          <div class="history-line">
+            <span>${escapeHtml(item.id)}</span>
+            <span>${escapeHtml(item.label)}</span>
+          </div>
+          <div class="history-line">
+            <span>${formatDate(item.createdAt)}</span>
+            <span>${item.winners.length} ganhador(es)</span>
+            <span>${item.alternates.length} suplente(s)</span>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.className = "toast-message";
+      toast.textContent = message;
+      els.toast.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 2800);
+    }
+
+    function updateAllInsights() {
+      updateNameInsights();
+      updateNumberInsights();
+    }
+
+    function fillExample() {
+      if (activeMode === "names") {
+        els.namesInput.value = [
+          "Ana Silva",
+          "Bruno Martins",
+          "Carla Souza",
+          "Diego Lima",
+          "Fernanda Alves",
+          "Gabriel Rocha",
+          "Juliana Mendes",
+          "Marcos Pereira",
+          "ana silva",
+          "Renata Costa"
+        ].join("\n");
+        els.nameWinnerCount.value = 2;
+        els.nameAlternateCount.value = 1;
+        showToast("Exemplo de nomes inserido.");
+      } else {
+        els.minNumber.value = 1;
+        els.maxNumber.value = 250;
+        els.numberWinnerCount.value = 5;
+        els.numberAlternateCount.value = 2;
+        els.excludedNumbers.value = "13, 22, 89";
+        showToast("Exemplo numérico inserido.");
+      }
+      updateAllInsights();
+    }
+
+    function resetCurrentForm() {
+      if (activeMode === "names") {
+        els.namesInput.value = "";
+        els.nameWinnerCount.value = 1;
+        els.nameAlternateCount.value = 0;
+      } else {
+        els.minNumber.value = 1;
+        els.maxNumber.value = 100;
+        els.numberWinnerCount.value = 1;
+        els.numberAlternateCount.value = 0;
+        els.numberPadding.value = 0;
+        els.excludedNumbers.value = "";
+      }
+      updateAllInsights();
+      showToast("Tela limpa.");
+    }
+
+    function clearResultView() {
+      currentResult = null;
+      els.drawAnimation.classList.remove("active");
+      els.resultContent.classList.remove("active");
+      els.idleState.classList.remove("hidden");
+      els.resultSubtitle.textContent = "Configure e execute um sorteio.";
+    }
+
+    els.tabs.forEach((tab) => {
+      tab.addEventListener("click", () => setMode(tab.dataset.mode));
+    });
+
+    [
+      els.namesInput,
+      els.nameWinnerCount,
+      els.nameAlternateCount,
+      els.dedupeNames,
+      els.caseSmartNames,
+      els.minNumber,
+      els.maxNumber,
+      els.numberWinnerCount,
+      els.numberAlternateCount,
+      els.numberPadding,
+      els.excludedNumbers
+    ].forEach((input) => {
+      input.addEventListener("input", updateAllInsights);
+      input.addEventListener("change", updateAllInsights);
+    });
+
+    els.importButton.addEventListener("click", () => els.fileInput.click());
+    els.fileInput.addEventListener("change", async () => {
+      const file = els.fileInput.files && els.fileInput.files[0];
+      if (!file) return;
+      const text = await file.text();
+      const normalized = text
+        .split(/\r?\n/)
+        .flatMap((line) => line.includes(",") ? line.split(",") : [line])
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .join("\n");
+      els.namesInput.value = normalized;
+      els.fileInput.value = "";
+      updateAllInsights();
+      showToast("Lista importada.");
+    });
+
+    els.sortNamesButton.addEventListener("click", () => {
+      const names = parseNames().values.sort((a, b) => a.localeCompare(b, "pt-BR"));
+      els.namesInput.value = names.join("\n");
+      updateAllInsights();
+      showToast("Lista ordenada.");
+    });
+
+    els.cleanNamesButton.addEventListener("click", () => {
+      const previous = els.dedupeNames.checked;
+      els.dedupeNames.checked = true;
+      const names = parseNames().values;
+      els.namesInput.value = names.join("\n");
+      els.dedupeNames.checked = previous;
+      updateAllInsights();
+      showToast("Duplicados removidos.");
+    });
+
+    els.clearNamesButton.addEventListener("click", () => {
+      els.namesInput.value = "";
+      updateAllInsights();
+      showToast("Lista limpa.");
+    });
+
+    els.clearNumbersButton.addEventListener("click", () => {
+      els.excludedNumbers.value = "";
+      updateAllInsights();
+      showToast("Exclusões limpas.");
+    });
+
+    els.rangeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const [min, max] = button.dataset.range.split(",");
+        els.minNumber.value = min;
+        els.maxNumber.value = max;
+        els.rangeButtons.forEach((item) => item.classList.toggle("active", item === button));
+        updateAllInsights();
+      });
+    });
+
+    els.drawNamesButton.addEventListener("click", drawNames);
+    els.drawNumbersButton.addEventListener("click", drawNumbers);
+    els.exampleButton.addEventListener("click", fillExample);
+    els.resetAllButton.addEventListener("click", resetCurrentForm);
+    els.copyResultButton.addEventListener("click", copyCurrentResult);
+    els.downloadResultButton.addEventListener("click", downloadCurrentResult);
+    els.newDrawButton.addEventListener("click", clearResultView);
+
+    els.historyList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-history-id]");
+      if (!button) return;
+      const result = history.find((item) => item.id === button.dataset.historyId);
+      if (result) renderResult(result);
+    });
+
+    els.clearHistoryButton.addEventListener("click", () => {
+      history = [];
+      localStorage.removeItem(STORAGE_KEY);
+      renderHistory();
+      showToast("Histórico limpo.");
+    });
+
+    updateAllInsights();
+    renderHistory();
+  </script>
+</body>
+</html>
