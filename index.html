@@ -1840,7 +1840,7 @@
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1200);
     }
 
     function printCurrentResult() {
@@ -1890,7 +1890,7 @@
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1200);
       showToast("PDF gerado.");
     }
 
