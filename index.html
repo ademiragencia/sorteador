@@ -180,7 +180,7 @@
 
     .mode-tabs {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       border-bottom: 1px solid var(--line);
       background: var(--surface-2);
     }
@@ -499,6 +499,23 @@
     .alert.error {
       border-color: #fecdd6;
       background: var(--rose-soft);
+    }
+
+    .lottery-note {
+      display: grid;
+      gap: 5px;
+      margin: 10px 0 16px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.36;
+    }
+
+    .lottery-note strong {
+      color: var(--ink);
     }
 
     .result-stage {
@@ -975,6 +992,7 @@
         <div class="mode-tabs" role="tablist" aria-label="Tipo de sorteio">
           <button class="tab-button" type="button" role="tab" aria-selected="true" aria-controls="namesMode" id="tabNames" data-mode="names">Nomes</button>
           <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="numbersMode" id="tabNumbers" data-mode="numbers">Números</button>
+          <button class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="lotteryMode" id="tabLottery" data-mode="lottery">Loterias Caixa</button>
         </div>
 
         <div class="form-body">
@@ -1150,6 +1168,95 @@
               <button class="primary-button" type="button" id="drawNumbersButton">Sortear números</button>
             </div>
           </div>
+
+          <div id="lotteryMode" class="mode-view" role="tabpanel" aria-labelledby="tabLottery">
+            <div class="section-title">
+              <div>
+                <h2>Palpites das Loterias Caixa</h2>
+                <p>Gere combinações para as principais modalidades numéricas.</p>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label for="lotteryGame">Modalidade</label>
+                <select class="input" id="lotteryGame">
+                  <option value="mega">Mega-Sena</option>
+                  <option value="lotofacil">Lotofácil</option>
+                  <option value="quina">Quina</option>
+                  <option value="lotomania">Lotomania</option>
+                  <option value="timemania">Timemania</option>
+                  <option value="dia">Dia de Sorte</option>
+                  <option value="dupla">Dupla Sena</option>
+                  <option value="milionaria">+Milionária</option>
+                  <option value="supersete">Super Sete</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="lotteryBetCount">Quantidade de palpites</label>
+                <input class="input" id="lotteryBetCount" type="number" min="1" max="20" value="5">
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label for="lotteryPickCount">Números por palpite</label>
+                <input class="input" id="lotteryPickCount" type="number" min="1" value="6">
+                <small id="lotteryRuleText">Mega-Sena: 6 a 20 números entre 1 e 60.</small>
+              </div>
+              <div class="field">
+                <label for="lotteryStrategy">Estilo do palpite</label>
+                <select class="input" id="lotteryStrategy">
+                  <option value="balanced">Equilibrado</option>
+                  <option value="random">Aleatório puro</option>
+                  <option value="low">Mais baixos</option>
+                  <option value="high">Mais altos</option>
+                  <option value="odd">Mais ímpares</option>
+                  <option value="even">Mais pares</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="switch-grid">
+              <label class="switch" for="lotterySorted">
+                <input id="lotterySorted" type="checkbox" checked>
+                <span>
+                  <strong>Ordenar dezenas</strong>
+                  <span>Mostra cada palpite em ordem crescente, como fica mais fácil conferir no volante.</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="lottery-note" id="lotteryExtraInfo">
+              <strong>Palpites aleatórios</strong>
+              <span>Não existe garantia de premiação. Confira sempre a aposta final nos canais oficiais da CAIXA.</span>
+            </div>
+
+            <div class="grid-4" aria-live="polite">
+              <div class="metric">
+                <span>Modalidade</span>
+                <strong id="lotteryMetricGame">Mega</strong>
+              </div>
+              <div class="metric">
+                <span>Universo</span>
+                <strong id="lotteryMetricRange">60</strong>
+              </div>
+              <div class="metric">
+                <span>Por palpite</span>
+                <strong id="lotteryMetricPicks">6</strong>
+              </div>
+              <div class="metric">
+                <span>Palpites</span>
+                <strong id="lotteryMetricBets">5</strong>
+              </div>
+            </div>
+
+            <div class="alert-stack" id="lotteryAlerts"></div>
+
+            <div class="button-row">
+              <button class="primary-button" type="button" id="drawLotteryButton">Gerar palpites</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1178,12 +1285,12 @@
             <div class="result-content" id="resultContent">
               <div class="result-meta" id="resultMeta"></div>
               <div class="winner-spotlight">
-                <span>Primeiro resultado</span>
+                <span id="spotlightLabel">Primeiro resultado</span>
                 <strong id="mainWinner">-</strong>
               </div>
               <div id="winnerBlock">
                 <div class="section-title">
-                  <h3>Ganhadores</h3>
+                  <h3 id="winnerBlockTitle">Ganhadores</h3>
                 </div>
                 <ol class="rank-list" id="winnerList"></ol>
               </div>
@@ -1245,6 +1352,7 @@
       tabs: Array.from(document.querySelectorAll(".tab-button")),
       namesMode: document.getElementById("namesMode"),
       numbersMode: document.getElementById("numbersMode"),
+      lotteryMode: document.getElementById("lotteryMode"),
       drawTitle: document.getElementById("drawTitle"),
       organizerName: document.getElementById("organizerName"),
       drawNotes: document.getElementById("drawNotes"),
@@ -1278,6 +1386,19 @@
       drawNumbersButton: document.getElementById("drawNumbersButton"),
       clearNumbersButton: document.getElementById("clearNumbersButton"),
       rangeButtons: Array.from(document.querySelectorAll("[data-range]")),
+      lotteryGame: document.getElementById("lotteryGame"),
+      lotteryBetCount: document.getElementById("lotteryBetCount"),
+      lotteryPickCount: document.getElementById("lotteryPickCount"),
+      lotteryStrategy: document.getElementById("lotteryStrategy"),
+      lotterySorted: document.getElementById("lotterySorted"),
+      lotteryRuleText: document.getElementById("lotteryRuleText"),
+      lotteryExtraInfo: document.getElementById("lotteryExtraInfo"),
+      lotteryMetricGame: document.getElementById("lotteryMetricGame"),
+      lotteryMetricRange: document.getElementById("lotteryMetricRange"),
+      lotteryMetricPicks: document.getElementById("lotteryMetricPicks"),
+      lotteryMetricBets: document.getElementById("lotteryMetricBets"),
+      lotteryAlerts: document.getElementById("lotteryAlerts"),
+      drawLotteryButton: document.getElementById("drawLotteryButton"),
       exampleButton: document.getElementById("exampleButton"),
       resetAllButton: document.getElementById("resetAllButton"),
       themeButton: document.getElementById("themeButton"),
@@ -1287,7 +1408,9 @@
       resultContent: document.getElementById("resultContent"),
       resultSubtitle: document.getElementById("resultSubtitle"),
       resultMeta: document.getElementById("resultMeta"),
+      spotlightLabel: document.getElementById("spotlightLabel"),
       mainWinner: document.getElementById("mainWinner"),
+      winnerBlockTitle: document.getElementById("winnerBlockTitle"),
       winnerList: document.getElementById("winnerList"),
       alternateBlock: document.getElementById("alternateBlock"),
       alternateList: document.getElementById("alternateList"),
@@ -1316,6 +1439,18 @@
     const STORAGE_KEY = "sorteador-inteligente-historico-v3";
     const THEME_KEY = "sorteador-inteligente-tema";
     const HARD_NUMBER_LIMIT = 200000;
+    const MONTHS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const LOTTERY_GAMES = {
+      mega: { short: "Mega", name: "Mega-Sena", min: 1, max: 60, minPicks: 6, maxPicks: 20, defaultPicks: 6, pad: 2, rule: "Mega-Sena: 6 a 20 números entre 1 e 60." },
+      lotofacil: { short: "Lotofácil", name: "Lotofácil", min: 1, max: 25, minPicks: 15, maxPicks: 20, defaultPicks: 15, pad: 2, rule: "Lotofácil: 15 a 20 números entre 1 e 25." },
+      quina: { short: "Quina", name: "Quina", min: 1, max: 80, minPicks: 5, maxPicks: 15, defaultPicks: 5, pad: 2, rule: "Quina: 5 a 15 números entre 1 e 80." },
+      lotomania: { short: "Lotomania", name: "Lotomania", min: 0, max: 99, minPicks: 50, maxPicks: 50, defaultPicks: 50, pad: 2, rule: "Lotomania: 50 números entre 00 e 99." },
+      timemania: { short: "Timemania", name: "Timemania", min: 1, max: 80, minPicks: 10, maxPicks: 10, defaultPicks: 10, pad: 2, extra: "Time do Coração: escolha no volante oficial.", rule: "Timemania: 10 números entre 1 e 80, além do Time do Coração." },
+      dia: { short: "Dia", name: "Dia de Sorte", min: 1, max: 31, minPicks: 7, maxPicks: 15, defaultPicks: 7, pad: 2, month: true, rule: "Dia de Sorte: 7 a 15 números entre 1 e 31, mais 1 Mês de Sorte." },
+      dupla: { short: "Dupla", name: "Dupla Sena", min: 1, max: 50, minPicks: 6, maxPicks: 15, defaultPicks: 6, pad: 2, rule: "Dupla Sena: 6 a 15 números entre 1 e 50." },
+      milionaria: { short: "+Milionária", name: "+Milionária", min: 1, max: 50, minPicks: 6, maxPicks: 6, defaultPicks: 6, pad: 2, trevos: true, rule: "+Milionária: 6 números entre 1 e 50 e 2 trevos entre 1 e 6." },
+      supersete: { short: "Super 7", name: "Super Sete", min: 0, max: 9, minPicks: 7, maxPicks: 7, defaultPicks: 7, pad: 1, columns: true, rule: "Super Sete: 7 colunas, com 1 número de 0 a 9 em cada coluna." }
+    };
     let activeMode = "names";
     let currentResult = null;
     let history = loadHistory();
@@ -1521,6 +1656,144 @@
       els.drawNumbersButton.disabled = data.totalRange <= 0 || data.totalRange > HARD_NUMBER_LIMIT || data.pool.length < 1 || requested > data.pool.length || winners < 1;
     }
 
+    function getLotteryGame() {
+      return LOTTERY_GAMES[els.lotteryGame.value] || LOTTERY_GAMES.mega;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function lotteryPool(game) {
+      const pool = [];
+      for (let number = game.min; number <= game.max; number += 1) pool.push(number);
+      return pool;
+    }
+
+    function formatLotteryNumber(number, game) {
+      return String(number).padStart(game.pad, "0");
+    }
+
+    function updateLotteryGameControls() {
+      const game = getLotteryGame();
+      els.lotteryPickCount.min = game.minPicks;
+      els.lotteryPickCount.max = game.maxPicks;
+      const current = asPositiveInt(els.lotteryPickCount.value, game.defaultPicks);
+      els.lotteryPickCount.value = clamp(current, game.minPicks, game.maxPicks);
+      els.lotteryPickCount.disabled = game.minPicks === game.maxPicks;
+      els.lotteryRuleText.textContent = game.rule;
+      const extras = [];
+      if (game.month) extras.push("Mês da Sorte gerado automaticamente.");
+      if (game.trevos) extras.push("Trevos gerados automaticamente.");
+      if (game.columns) extras.push("Um número por coluna.");
+      if (game.extra) extras.push(game.extra);
+      els.lotteryExtraInfo.innerHTML = `
+        <strong>${escapeHtml(game.name)}</strong>
+        <span>${escapeHtml(extras.length ? extras.join(" ") : "Palpites aleatórios, sem garantia de premiação.")}</span>
+      `;
+    }
+
+    function updateLotteryInsights() {
+      updateLotteryGameControls();
+      const game = getLotteryGame();
+      const bets = clamp(asPositiveInt(els.lotteryBetCount.value, 1), 1, 20);
+      const picks = clamp(asPositiveInt(els.lotteryPickCount.value, game.defaultPicks), game.minPicks, game.maxPicks);
+      const alerts = [];
+
+      els.lotteryBetCount.value = bets;
+      els.lotteryPickCount.value = picks;
+      els.lotteryMetricGame.textContent = game.short;
+      els.lotteryMetricRange.textContent = game.columns ? "7 col." : `${game.min}-${game.max}`;
+      els.lotteryMetricPicks.textContent = game.columns ? "7 col." : picks;
+      els.lotteryMetricBets.textContent = bets;
+
+      alerts.push({ type: "info", text: "Palpites são combinações aleatórias. Eles não aumentam a probabilidade matemática do jogo." });
+      if (game.extra) alerts.push({ type: "warn", text: game.extra });
+      renderAlerts(els.lotteryAlerts, alerts);
+      els.drawLotteryButton.disabled = bets < 1 || picks < game.minPicks || picks > game.maxPicks;
+    }
+
+    function scoreLotterySet(numbers, game, strategy) {
+      if (strategy === "random" || game.columns) return 0;
+      const middle = (game.min + game.max) / 2;
+      const odd = numbers.filter((number) => Math.abs(number % 2) === 1).length;
+      const high = numbers.filter((number) => number > middle).length;
+      const sorted = numbers.slice().sort((a, b) => a - b);
+      let longestRun = 1;
+      let run = 1;
+      for (let index = 1; index < sorted.length; index += 1) {
+        if (sorted[index] === sorted[index - 1] + 1) {
+          run += 1;
+          longestRun = Math.max(longestRun, run);
+        } else {
+          run = 1;
+        }
+      }
+      const target = numbers.length / 2;
+      const balanced = Math.abs(odd - target) + Math.abs(high - target) + Math.max(0, longestRun - 2) * 1.5;
+      if (strategy === "low") return high + Math.max(0, longestRun - 3);
+      if (strategy === "high") return numbers.length - high + Math.max(0, longestRun - 3);
+      if (strategy === "odd") return numbers.length - odd + Math.max(0, longestRun - 3);
+      if (strategy === "even") return odd + Math.max(0, longestRun - 3);
+      return balanced;
+    }
+
+    function generateNumberPick(game, picks, strategy) {
+      const pool = lotteryPool(game);
+      let best = null;
+      let bestScore = Infinity;
+      const attempts = strategy === "random" ? 1 : 32;
+      for (let attempt = 0; attempt < attempts; attempt += 1) {
+        const candidate = shuffle(pool).slice(0, picks);
+        const score = scoreLotterySet(candidate, game, strategy);
+        if (score < bestScore) {
+          best = candidate;
+          bestScore = score;
+        }
+      }
+      return els.lotterySorted.checked ? best.slice().sort((a, b) => a - b) : best;
+    }
+
+    function generateLotteryBet(game, picks, strategy) {
+      if (game.columns) {
+        return {
+          numbers: Array.from({ length: 7 }, (_, index) => ({ column: index + 1, value: secureRandomInt(10) }))
+        };
+      }
+      const bet = { numbers: generateNumberPick(game, picks, strategy) };
+      if (game.trevos) bet.trevos = generateNumberPick({ min: 1, max: 6, pad: 1 }, 2, "balanced").sort((a, b) => a - b);
+      if (game.month) bet.month = MONTHS[secureRandomInt(MONTHS.length)];
+      if (game.extra) bet.extra = game.extra;
+      return bet;
+    }
+
+    function formatLotteryBet(game, bet) {
+      if (game.columns) {
+        return bet.numbers.map((item) => `C${item.column}: ${item.value}`).join(" | ");
+      }
+      const numbers = bet.numbers.map((number) => formatLotteryNumber(number, game)).join(" ");
+      const extras = [];
+      if (bet.trevos) extras.push(`Trevos: ${bet.trevos.join(" ")}`);
+      if (bet.month) extras.push(`Mês: ${bet.month}`);
+      if (bet.extra) extras.push(bet.extra);
+      return extras.length ? `${numbers} | ${extras.join(" | ")}` : numbers;
+    }
+
+    function uniqueLotteryBets(game, picks, strategy, betCount) {
+      const bets = [];
+      const seen = new Set();
+      let attempts = 0;
+      while (bets.length < betCount && attempts < betCount * 24) {
+        attempts += 1;
+        const bet = generateLotteryBet(game, picks, strategy);
+        const formatted = formatLotteryBet(game, bet);
+        if (seen.has(formatted)) continue;
+        seen.add(formatted);
+        bets.push({ ...bet, formatted });
+      }
+      return bets;
+    }
+
     function renderAlerts(target, alerts) {
       target.innerHTML = alerts.map((alert) => `
         <div class="alert ${alert.type}">
@@ -1533,6 +1806,7 @@
     function updateAllInsights() {
       updateNameInsights();
       updateNumberInsights();
+      updateLotteryInsights();
     }
 
     function setMode(mode) {
@@ -1543,6 +1817,7 @@
       });
       els.namesMode.classList.toggle("active", mode === "names");
       els.numbersMode.classList.toggle("active", mode === "numbers");
+      els.lotteryMode.classList.toggle("active", mode === "lottery");
       updateAllInsights();
     }
 
@@ -1616,13 +1891,50 @@
       revealResult(result, data.pool.map(format));
     }
 
+    async function drawLottery() {
+      const game = getLotteryGame();
+      const betCount = clamp(asPositiveInt(els.lotteryBetCount.value, 1), 1, 20);
+      const picks = clamp(asPositiveInt(els.lotteryPickCount.value, game.defaultPicks), game.minPicks, game.maxPicks);
+      const strategy = els.lotteryStrategy.value;
+      const bets = uniqueLotteryBets(game, picks, strategy, betCount);
+      if (!bets.length) return;
+
+      const result = await createResult({
+        mode: "lottery",
+        winners: bets.map((bet, index) => `Palpite ${index + 1}: ${bet.formatted}`),
+        alternates: [],
+        poolSize: game.columns ? 70 : game.max - game.min + 1,
+        rawCount: bets.length,
+        duplicateCount: 0,
+        removedDuplicates: [],
+        ignoredItems: [],
+        sourceHashInput: stableStringify({ game: game.name, picks, strategy, bets: bets.map((bet) => bet.formatted) }),
+        parameters: {
+          modalidade: game.name,
+          palpites: bets.length,
+          numerosPorPalpite: game.columns ? "7 colunas" : picks,
+          universo: game.columns ? "7 colunas de 0 a 9" : `${game.min} a ${game.max}`,
+          estilo: els.lotteryStrategy.options[els.lotteryStrategy.selectedIndex].text,
+          ordenado: els.lotterySorted.checked ? "sim" : "não",
+          observacao: "Palpites aleatórios; não garantem premiação."
+        }
+      });
+
+      revealResult(result, bets.map((bet) => bet.formatted));
+    }
+
     async function createResult({ mode, winners, alternates, poolSize, rawCount, duplicateCount, removedDuplicates, ignoredItems, sourceHashInput, parameters }) {
       const createdAt = new Date();
       const meta = collectMeta();
+      const labels = {
+        names: "Sorteio por nomes",
+        numbers: "Sorteio por números",
+        lottery: `Palpites ${parameters.modalidade || "Loterias Caixa"}`
+      };
       const base = {
         id: makeId(createdAt),
         mode,
-        label: mode === "names" ? "Sorteio por nomes" : "Sorteio por números",
+        label: labels[mode] || "Resultado",
         createdAt: createdAt.toISOString(),
         meta,
         winners,
@@ -1689,7 +2001,7 @@
             renderResult(result);
             saveResult(result);
             setDrawButtonsDisabled(false);
-            showToast("Sorteio concluído, auditado e salvo no histórico.");
+            showToast(result.mode === "lottery" ? "Palpites gerados, auditados e salvos no histórico." : "Sorteio concluído, auditado e salvo no histórico.");
           }, 250);
         }
       }, 78);
@@ -1698,6 +2010,7 @@
     function setDrawButtonsDisabled(disabled) {
       els.drawNamesButton.disabled = disabled || els.drawNamesButton.disabled;
       els.drawNumbersButton.disabled = disabled || els.drawNumbersButton.disabled;
+      els.drawLotteryButton.disabled = disabled || els.drawLotteryButton.disabled;
       if (!disabled) updateAllInsights();
     }
 
@@ -1708,18 +2021,21 @@
       els.resultContent.classList.add("active");
       els.resultSubtitle.textContent = `${result.meta.title} executado em ${formatDate(result.createdAt)}.`;
       els.mainWinner.textContent = result.winners[0] || "-";
+      const isLottery = result.mode === "lottery";
+      els.spotlightLabel.textContent = isLottery ? "Primeiro palpite" : "Primeiro resultado";
+      els.winnerBlockTitle.textContent = isLottery ? "Palpites" : "Ganhadores";
       els.resultMeta.innerHTML = `
         <span class="pill success">${escapeHtml(result.id)}</span>
         <span class="pill">${escapeHtml(result.label)}</span>
-        <span class="pill">${result.poolSize} disponíveis</span>
+        <span class="pill">${isLottery ? `${result.rawCount} palpite(s)` : `${result.poolSize} disponíveis`}</span>
       `;
-      els.winnerList.innerHTML = result.winners.map((winner, index) => rankItem(index + 1, winner, "Ganhador")).join("");
+      els.winnerList.innerHTML = result.winners.map((winner, index) => rankItem(index + 1, winner, isLottery ? "Palpite" : "Ganhador")).join("");
       els.alternateList.innerHTML = result.alternates.map((alternate, index) => rankItem(index + 1, alternate, "Suplente")).join("");
       els.alternateBlock.classList.toggle("hidden", result.alternates.length === 0);
       els.auditSummary.innerHTML = `
         <b>Auditoria do sorteio</b>
         <span>Organizador: ${escapeHtml(result.meta.organizer)}</span>
-        <span>Entrada: ${result.rawCount} item(ns). Disponíveis após validação: ${result.poolSize}. Duplicados removidos: ${result.removedDuplicates.length}. Ignorados: ${result.ignoredItems.length}.</span>
+        <span>${isLottery ? `Modalidade: ${escapeHtml(result.parameters.modalidade)}. Palpites gerados: ${result.rawCount}. Universo: ${escapeHtml(result.parameters.universo)}.` : `Entrada: ${result.rawCount} item(ns). Disponíveis após validação: ${result.poolSize}. Duplicados removidos: ${result.removedDuplicates.length}. Ignorados: ${result.ignoredItems.length}.`}</span>
         <span>Hash da entrada: ${escapeHtml(shortHash(result.inputHash))}</span>
         <span>Hash do comprovante: ${escapeHtml(shortHash(result.checksum))}</span>
       `;
@@ -1747,8 +2063,9 @@
 
     function certificateLines(result) {
       const parameters = Object.entries(result.parameters).map(([key, value]) => `${key}: ${value}`);
+      const isLottery = result.mode === "lottery";
       return [
-        "COMPROVANTE DE SORTEIO",
+        isLottery ? "COMPROVANTE DE PALPITES" : "COMPROVANTE DE SORTEIO",
         "",
         `ID: ${result.id}`,
         `Sorteio: ${result.meta.title}`,
@@ -1756,17 +2073,16 @@
         `Tipo: ${result.label}`,
         `Data e hora: ${formatDate(result.createdAt)}`,
         `Motor aleatório: ${result.engine}`,
-        `Total original: ${result.rawCount}`,
-        `Total disponível: ${result.poolSize}`,
-        `Duplicados removidos: ${result.removedDuplicates.length}`,
-        `Itens ignorados: ${result.ignoredItems.length}`,
+        isLottery ? `Palpites gerados: ${result.rawCount}` : `Total original: ${result.rawCount}`,
+        isLottery ? `Universo: ${result.parameters.universo}` : `Total disponível: ${result.poolSize}`,
+        ...(isLottery ? ["Aviso: palpites aleatórios não garantem premiação."] : [`Duplicados removidos: ${result.removedDuplicates.length}`, `Itens ignorados: ${result.ignoredItems.length}`]),
         `Hash da entrada: ${result.inputHash}`,
         `Hash do comprovante: ${result.checksum}`,
         "",
         "Parâmetros",
         ...parameters.map((line) => `- ${line}`),
         "",
-        "Ganhadores",
+        isLottery ? "Palpites" : "Ganhadores",
         ...result.winners.map((winner, index) => `${index + 1}. ${winner}`),
         ...(result.alternates.length ? ["", "Suplentes", ...result.alternates.map((alternate, index) => `${index + 1}. ${alternate}`)] : []),
         ...(result.meta.notes ? ["", "Observações", result.meta.notes] : []),
@@ -1780,9 +2096,10 @@
     }
 
     function resultToCsv(result) {
+      const winnerType = result.mode === "lottery" ? "palpite" : "ganhador";
       const rows = [
         ["tipo", "posicao", "valor", "id", "sorteio", "organizador", "data", "checksum"],
-        ...result.winners.map((winner, index) => ["ganhador", index + 1, winner, result.id, result.meta.title, result.meta.organizer, result.createdAt, result.checksum]),
+        ...result.winners.map((winner, index) => [winnerType, index + 1, winner, result.id, result.meta.title, result.meta.organizer, result.createdAt, result.checksum]),
         ...result.alternates.map((alternate, index) => ["suplente", index + 1, alternate, result.id, result.meta.title, result.meta.organizer, result.createdAt, result.checksum])
       ];
       return rows.map((row) => row.map(csvCell).join(",")).join("\n");
@@ -1850,23 +2167,24 @@
     }
 
     function certificateHtml(result) {
+      const isLottery = result.mode === "lottery";
       const winners = result.winners.map((winner, index) => `<li>${index + 1}. ${escapeHtml(winner)}</li>`).join("");
       const alternates = result.alternates.map((alternate, index) => `<li>${index + 1}. ${escapeHtml(alternate)}</li>`).join("");
       const params = Object.entries(result.parameters).map(([key, value]) => `<li>${escapeHtml(key)}: ${escapeHtml(value)}</li>`).join("");
       return `
-        <h1>Comprovante de Sorteio</h1>
+        <h1>${isLottery ? "Comprovante de Palpites" : "Comprovante de Sorteio"}</h1>
         <p><strong>ID:</strong> ${escapeHtml(result.id)}</p>
         <p><strong>Sorteio:</strong> ${escapeHtml(result.meta.title)}</p>
         <p><strong>Organizador:</strong> ${escapeHtml(result.meta.organizer)}</p>
         <p><strong>Data:</strong> ${escapeHtml(formatDate(result.createdAt))}</p>
         <div class="print-box">
-          <h2>Ganhadores</h2>
+          <h2>${isLottery ? "Palpites" : "Ganhadores"}</h2>
           <ol>${winners}</ol>
           ${alternates ? `<h2>Suplentes</h2><ol>${alternates}</ol>` : ""}
         </div>
         <div class="print-box">
           <h2>Auditoria</h2>
-          <p>Total original: ${result.rawCount}. Total disponível: ${result.poolSize}. Duplicados removidos: ${result.removedDuplicates.length}. Ignorados: ${result.ignoredItems.length}.</p>
+          <p>${isLottery ? `Palpites gerados: ${result.rawCount}. Universo: ${escapeHtml(result.parameters.universo)}.` : `Total original: ${result.rawCount}. Total disponível: ${result.poolSize}. Duplicados removidos: ${result.removedDuplicates.length}. Ignorados: ${result.ignoredItems.length}.`}</p>
           <p>Motor aleatório: ${escapeHtml(result.engine)}</p>
           <p>Hash da entrada: ${escapeHtml(result.inputHash)}</p>
           <p>Hash do comprovante: ${escapeHtml(result.checksum)}</p>
@@ -1926,7 +2244,7 @@
 
       pages.forEach((page) => {
         const commands = page.map((line, index) => {
-          const size = index === 0 && line.text === "COMPROVANTE DE SORTEIO" ? 18 : 10;
+          const size = index === 0 && line.text.startsWith("COMPROVANTE DE") ? 18 : 10;
           return `BT /F1 ${size} Tf 50 ${line.y} Td <${pdfHex(line.text)}> Tj ET`;
         }).join("\n");
         const contentId = objects.length + 1;
@@ -1982,9 +2300,10 @@
 
     function shareWhatsApp() {
       if (!currentResult) return;
+      const resultLabel = currentResult.mode === "lottery" ? "Palpites" : "Resultado";
       const text = [
         `${currentResult.meta.title}`,
-        `Resultado: ${currentResult.winners.join(", ")}`,
+        `${resultLabel}: ${currentResult.winners.join(", ")}`,
         currentResult.alternates.length ? `Suplentes: ${currentResult.alternates.join(", ")}` : "",
         `Comprovante: ${currentResult.id}`,
         `Hash: ${shortHash(currentResult.checksum)}`
@@ -2082,13 +2401,19 @@
     }
 
     function fillExample() {
-      els.drawTitle.value = activeMode === "names" ? "Sorteio Dia dos Pais" : "Sorteio de números da campanha";
+      els.drawTitle.value = activeMode === "names" ? "Sorteio Dia dos Pais" : activeMode === "lottery" ? "Palpites Loterias Caixa" : "Sorteio de números da campanha";
       els.organizerName.value = "Ademir Agência";
-      els.drawNotes.value = "Sorteio realizado com lista travada no momento da execução. Suplentes seguem a ordem exibida.";
+      els.drawNotes.value = activeMode === "lottery" ? "Palpites gerados automaticamente para conferência e uso nos canais oficiais da CAIXA." : "Sorteio realizado com lista travada no momento da execução. Suplentes seguem a ordem exibida.";
       if (activeMode === "names") {
         els.namesInput.value = ["Ana Silva", "Bruno Martins", "Carla Souza", "Diego Lima", "Fernanda Alves", "Gabriel Rocha", "Juliana Mendes", "ana silva", "Renata Costa"].join("\n");
         els.nameWinnerCount.value = 2;
         els.nameAlternateCount.value = 1;
+      } else if (activeMode === "lottery") {
+        els.lotteryGame.value = "mega";
+        els.lotteryBetCount.value = 5;
+        els.lotteryPickCount.value = 6;
+        els.lotteryStrategy.value = "balanced";
+        els.lotterySorted.checked = true;
       } else {
         els.minNumber.value = 1;
         els.maxNumber.value = 250;
@@ -2113,6 +2438,11 @@
       els.numberAlternateCount.value = 0;
       els.numberPadding.value = 0;
       els.excludedNumbers.value = "";
+      els.lotteryGame.value = "mega";
+      els.lotteryBetCount.value = 5;
+      els.lotteryPickCount.value = 6;
+      els.lotteryStrategy.value = "balanced";
+      els.lotterySorted.checked = true;
       updateAllInsights();
       showToast("Tela limpa.");
     }
@@ -2149,7 +2479,12 @@
       els.numberWinnerCount,
       els.numberAlternateCount,
       els.numberPadding,
-      els.excludedNumbers
+      els.excludedNumbers,
+      els.lotteryGame,
+      els.lotteryBetCount,
+      els.lotteryPickCount,
+      els.lotteryStrategy,
+      els.lotterySorted
     ].forEach((input) => {
       input.addEventListener("input", updateAllInsights);
       input.addEventListener("change", updateAllInsights);
@@ -2212,6 +2547,7 @@
 
     els.drawNamesButton.addEventListener("click", drawNames);
     els.drawNumbersButton.addEventListener("click", drawNumbers);
+    els.drawLotteryButton.addEventListener("click", drawLottery);
     els.exampleButton.addEventListener("click", fillExample);
     els.resetAllButton.addEventListener("click", resetCurrentForm);
     els.themeButton.addEventListener("click", toggleTheme);
