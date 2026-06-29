@@ -828,6 +828,73 @@
       flex-wrap: wrap;
     }
 
+    .donation-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 35;
+      display: none;
+      place-items: center;
+      padding: 22px;
+      background: rgba(7, 12, 20, 0.72);
+    }
+
+    .donation-overlay.active {
+      display: grid;
+    }
+
+    .donation-card {
+      display: grid;
+      width: min(430px, 100%);
+      gap: 14px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      color: var(--ink);
+    }
+
+    .donation-card h2 {
+      margin: 0;
+      font-size: 1.18rem;
+      line-height: 1.2;
+    }
+
+    .donation-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.42;
+    }
+
+    .pix-key {
+      display: grid;
+      gap: 5px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      overflow-wrap: anywhere;
+    }
+
+    .pix-key span {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .pix-key strong {
+      font-size: 1rem;
+      line-height: 1.25;
+    }
+
+    .donation-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -923,6 +990,10 @@
       .presentation-overlay {
         padding: 18px;
       }
+
+      .donation-actions > * {
+        width: 100%;
+      }
     }
 
     @media print {
@@ -982,6 +1053,7 @@
       </div>
       <div class="top-actions">
         <button class="secondary-button" type="button" id="exampleButton">Preencher exemplo</button>
+        <button class="secondary-button" type="button" id="donationButton">Apoiar</button>
         <button class="secondary-button" type="button" id="themeButton">Modo escuro</button>
         <button class="icon-button" type="button" id="resetAllButton" title="Limpar tela" aria-label="Limpar tela">L</button>
       </div>
@@ -1344,6 +1416,21 @@
     </div>
   </section>
 
+  <section class="donation-overlay" id="donationOverlay" aria-label="Apoiar com doação">
+    <div class="donation-card" role="dialog" aria-modal="true" aria-labelledby="donationTitle">
+      <h2 id="donationTitle">Apoiar o Sorteador</h2>
+      <p>A ferramenta é gratuita. Se ela te ajudou, você pode fazer uma doação voluntária por Pix.</p>
+      <div class="pix-key">
+        <span>Chave Pix</span>
+        <strong id="pixKey">ademirtrafegoads@gmail.com</strong>
+      </div>
+      <div class="donation-actions">
+        <button class="primary-button" type="button" id="copyPixButton">Copiar chave Pix</button>
+        <button class="ghost-button" type="button" id="closeDonationButton">Fechar</button>
+      </div>
+    </div>
+  </section>
+
   <div id="printArea" aria-hidden="true"></div>
   <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
 
@@ -1400,6 +1487,7 @@
       lotteryAlerts: document.getElementById("lotteryAlerts"),
       drawLotteryButton: document.getElementById("drawLotteryButton"),
       exampleButton: document.getElementById("exampleButton"),
+      donationButton: document.getElementById("donationButton"),
       resetAllButton: document.getElementById("resetAllButton"),
       themeButton: document.getElementById("themeButton"),
       idleState: document.getElementById("idleState"),
@@ -1432,6 +1520,10 @@
       presentationList: document.getElementById("presentationList"),
       presentationCloseButton: document.getElementById("presentationCloseButton"),
       presentationShareButton: document.getElementById("presentationShareButton"),
+      donationOverlay: document.getElementById("donationOverlay"),
+      copyPixButton: document.getElementById("copyPixButton"),
+      closeDonationButton: document.getElementById("closeDonationButton"),
+      pixKey: document.getElementById("pixKey"),
       printArea: document.getElementById("printArea"),
       toast: document.getElementById("toast")
     };
@@ -2356,6 +2448,19 @@
       els.presentationOverlay.classList.remove("active");
     }
 
+    function openDonation() {
+      els.donationOverlay.classList.add("active");
+    }
+
+    function closeDonation() {
+      els.donationOverlay.classList.remove("active");
+    }
+
+    async function copyPixKey() {
+      await copyText(els.pixKey.textContent.trim());
+      showToast("Chave Pix copiada.");
+    }
+
     function loadHistory() {
       try {
         const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
@@ -2549,6 +2654,9 @@
     els.drawNumbersButton.addEventListener("click", drawNumbers);
     els.drawLotteryButton.addEventListener("click", drawLottery);
     els.exampleButton.addEventListener("click", fillExample);
+    els.donationButton.addEventListener("click", openDonation);
+    els.copyPixButton.addEventListener("click", copyPixKey);
+    els.closeDonationButton.addEventListener("click", closeDonation);
     els.resetAllButton.addEventListener("click", resetCurrentForm);
     els.themeButton.addEventListener("click", toggleTheme);
     els.copyResultButton.addEventListener("click", copyCurrentResult);
@@ -2564,8 +2672,14 @@
     els.presentationOverlay.addEventListener("click", (event) => {
       if (event.target === els.presentationOverlay) closePresentation();
     });
+    els.donationOverlay.addEventListener("click", (event) => {
+      if (event.target === els.donationOverlay) closeDonation();
+    });
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closePresentation();
+      if (event.key === "Escape") {
+        closePresentation();
+        closeDonation();
+      }
     });
 
     els.historyList.addEventListener("click", (event) => {
