@@ -839,6 +839,437 @@
       }
     }
 
+    /* Premium visual refresh */
+    :root {
+      --bg: #eef4f8;
+      --surface: rgba(255, 255, 255, .86);
+      --surface-strong: #ffffff;
+      --ink: #111827;
+      --muted: #60718a;
+      --line: rgba(19, 39, 66, .12);
+      --brand: #007c89;
+      --brand-2: #255fdb;
+      --sun: #f6a21a;
+      --rose: #e84d7a;
+      --green: #16a66a;
+      --shadow: 0 24px 80px rgba(22, 38, 67, .16);
+      --radius: 16px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0c121b;
+      --surface: rgba(18, 25, 38, .86);
+      --surface-strong: #151f30;
+      --ink: #f1f6ff;
+      --muted: #a9b8ce;
+      --line: rgba(233, 240, 255, .14);
+      --shadow: 0 24px 80px rgba(0, 0, 0, .38);
+    }
+
+    body {
+      background:
+        linear-gradient(135deg, rgba(0, 124, 137, .16), transparent 28%),
+        linear-gradient(215deg, rgba(246, 162, 26, .14), transparent 30%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 48%, #f8fafc 100%);
+    }
+
+    [data-theme="dark"] body {
+      background:
+        linear-gradient(135deg, rgba(0, 124, 137, .18), transparent 30%),
+        linear-gradient(215deg, rgba(232, 77, 122, .14), transparent 30%),
+        linear-gradient(180deg, #101722 0%, var(--bg) 54%, #10131a 100%);
+    }
+
+    body::before {
+      opacity: .75;
+      background-size: 42px 42px;
+    }
+
+    .app {
+      width: min(1260px, calc(100% - 32px));
+      margin: 20px auto 44px;
+    }
+
+    .topbar {
+      top: 14px;
+      padding: 16px;
+      border-radius: 20px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, .96), rgba(255, 255, 255, .74)),
+        var(--surface);
+      box-shadow: 0 18px 55px rgba(22, 38, 67, .14);
+    }
+
+    [data-theme="dark"] .topbar {
+      background:
+        linear-gradient(135deg, rgba(26, 37, 55, .96), rgba(18, 25, 38, .78)),
+        var(--surface);
+    }
+
+    .brand {
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.18), transparent 35%),
+        linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 18px 34px rgba(0, 124, 137, .28);
+    }
+
+    .brand h1 {
+      font-size: clamp(1.45rem, 3.8vw, 2.3rem);
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin-top: 5px;
+      max-width: 42rem;
+      font-size: .96rem;
+      font-weight: 650;
+    }
+
+    .button {
+      min-height: 46px;
+      border-radius: 12px;
+      padding: 11px 15px;
+      font-weight: 850;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,251,255,.86)),
+        var(--surface-strong);
+      box-shadow: 0 12px 24px rgba(22, 38, 67, .09);
+    }
+
+    [data-theme="dark"] .button {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04)),
+        var(--surface-strong);
+    }
+
+    .button.primary {
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.18), transparent 34%),
+        linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 16px 32px rgba(37, 95, 219, .25);
+    }
+
+    .icon-only {
+      width: 46px;
+    }
+
+    .hero {
+      grid-template-columns: minmax(0, 1.18fr) minmax(360px, .82fr);
+      gap: 20px;
+    }
+
+    .panel {
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .controls {
+      padding: 0;
+    }
+
+    .controls > .field-grid {
+      padding: 22px 24px 0;
+    }
+
+    .controls > .mode-panel {
+      padding: 0 24px 24px;
+    }
+
+    .tabs {
+      gap: 0;
+      margin: 0;
+      background: rgba(230, 238, 248, .74);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tab {
+      min-height: 64px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+      font-size: 1rem;
+      font-weight: 950;
+      letter-spacing: 0;
+      position: relative;
+    }
+
+    .tab:last-child {
+      border-right: 0;
+    }
+
+    .tab[aria-selected="true"] {
+      color: #064f59;
+      background: rgba(255, 255, 255, .82);
+      box-shadow: none;
+    }
+
+    [data-theme="dark"] .tab[aria-selected="true"] {
+      color: #73f4ed;
+      background: rgba(255, 255, 255, .06);
+    }
+
+    .tab[aria-selected="true"]::after {
+      content: "";
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 0;
+      height: 4px;
+      border-radius: 999px 999px 0 0;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+    }
+
+    .field-grid {
+      gap: 14px;
+    }
+
+    label {
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    input,
+    textarea,
+    select {
+      border-color: rgba(30, 50, 80, .16);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .9);
+      padding: 13px 14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.65);
+    }
+
+    [data-theme="dark"] input,
+    [data-theme="dark"] textarea,
+    [data-theme="dark"] select {
+      border-color: rgba(233, 240, 255, .16);
+      background: rgba(255,255,255,.06);
+    }
+
+    textarea {
+      min-height: 190px;
+    }
+
+    .check {
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .68);
+      color: var(--ink);
+      box-shadow: 0 8px 20px rgba(22, 38, 67, .06);
+    }
+
+    [data-theme="dark"] .check {
+      background: rgba(255, 255, 255, .06);
+    }
+
+    .metric-row {
+      gap: 10px;
+    }
+
+    .metric {
+      min-height: 86px;
+      border-radius: 14px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.88), rgba(248,251,255,.74));
+      box-shadow: 0 10px 22px rgba(22, 38, 67, .07);
+    }
+
+    [data-theme="dark"] .metric {
+      background: rgba(255, 255, 255, .06);
+    }
+
+    .metric strong {
+      font-size: 1.5rem;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .visual-panel {
+      color: #f8fbff;
+      min-height: 100%;
+      padding: 22px;
+      background:
+        linear-gradient(145deg, rgba(0, 124, 137, .98), rgba(18, 32, 54, .98) 46%, rgba(37, 95, 219, .92)),
+        #122036;
+      border-color: rgba(255,255,255,.12);
+    }
+
+    .visual-panel::before {
+      inset: auto -80px -120px auto;
+      opacity: .22;
+      filter: blur(12px);
+    }
+
+    .stage {
+      min-height: 430px;
+      align-content: center;
+    }
+
+    .scene {
+      width: min(430px, 96%);
+      margin-bottom: 18px;
+      filter: drop-shadow(0 30px 44px rgba(0, 0, 0, .28));
+    }
+
+    .visual-title {
+      color: #ffffff;
+      font-size: clamp(1.65rem, 3.3vw, 2.45rem);
+    }
+
+    .visual-copy {
+      color: rgba(248, 251, 255, .76);
+      font-weight: 650;
+    }
+
+    .status-card {
+      background: rgba(255,255,255,.11);
+      border-color: rgba(255,255,255,.16);
+      color: #ffffff;
+      backdrop-filter: blur(12px);
+    }
+
+    .status-card span {
+      color: rgba(248, 251, 255, .68);
+    }
+
+    .winner-spotlight {
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.18), transparent 34%),
+        linear-gradient(135deg, var(--sun), var(--rose), var(--brand-2));
+    }
+
+    .result-item,
+    .history-item {
+      border-radius: 14px;
+      background: rgba(255,255,255,.86);
+      color: var(--ink);
+      box-shadow: 0 10px 22px rgba(22, 38, 67, .07);
+    }
+
+    [data-theme="dark"] .result-item,
+    [data-theme="dark"] .history-item {
+      background: rgba(255,255,255,.07);
+      color: var(--ink);
+    }
+
+    .visual-panel .result-item,
+    .visual-panel .audit {
+      color: #f8fbff;
+    }
+
+    .visual-panel .result-item {
+      background: rgba(255,255,255,.11);
+      border-color: rgba(255,255,255,.16);
+    }
+
+    .visual-panel .result-item span,
+    .visual-panel .audit {
+      color: rgba(248,251,255,.74);
+    }
+
+    .history-panel {
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .history-top h2 {
+      font-size: 1.3rem;
+    }
+
+    .modal-card {
+      border-radius: 18px;
+    }
+
+    .pix-box {
+      border-radius: 14px;
+    }
+
+    @media (max-width: 940px) {
+      .app {
+        width: min(100% - 22px, 1260px);
+      }
+
+      .topbar {
+        align-items: stretch;
+        border-radius: 18px;
+        flex-direction: column;
+      }
+
+      .top-actions {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .hero {
+        gap: 16px;
+        grid-template-columns: 1fr;
+      }
+
+      .stage,
+      .rolling {
+        min-height: 330px;
+      }
+
+      .scene {
+        width: min(360px, 92%);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .brand-mark {
+        width: 50px;
+        height: 50px;
+      }
+
+      .top-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .controls > .field-grid,
+      .controls > .mode-panel {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+
+      .tabs {
+        grid-template-columns: 1fr;
+      }
+
+      .tab {
+        min-height: 52px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .tab[aria-selected="true"]::after {
+        left: 15px;
+        right: 15px;
+      }
+
+      textarea {
+        min-height: 150px;
+      }
+
+      .stage,
+      .rolling {
+        min-height: 290px;
+      }
+
+      .scene {
+        width: min(290px, 92%);
+      }
+    }
+
     @media print {
       body {
         background: white !important;
@@ -882,13 +1313,13 @@
         </div>
         <div>
           <h1>Sorteador Inteligente</h1>
-          <p>Nomes, nÃºmeros, loterias Caixa, histÃ³rico e Pix.</p>
+          <p>Painel de sorteios</p>
         </div>
       </div>
       <div class="top-actions">
-        <button class="button" id="demoButton" type="button"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>Exemplo</button>
+        <button class="button" id="demoButton" type="button"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>Preencher exemplo</button>
         <button class="button" id="donationButton" type="button"><svg class="icon" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"></path></svg>Apoiar</button>
-        <button class="button icon-only" id="themeButton" type="button" aria-label="Alternar tema" title="Alternar tema"><svg class="icon" viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"></path></svg></button>
+        <button class="button" id="themeButton" type="button" aria-label="Alternar tema" title="Alternar tema"><svg class="icon" viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3 6.5 6.5 0 0 0 21 12.8Z"></path></svg>Tema</button>
       </div>
     </header>
 
@@ -896,18 +1327,18 @@
       <section class="panel controls" aria-label="Configurar sorteio">
         <div class="tabs" role="tablist" aria-label="Tipo de sorteio">
           <button class="tab" id="tabNames" type="button" role="tab" aria-selected="true" data-mode="names">Nomes</button>
-          <button class="tab" id="tabNumbers" type="button" role="tab" aria-selected="false" data-mode="numbers">NÃºmeros</button>
-          <button class="tab" id="tabLottery" type="button" role="tab" aria-selected="false" data-mode="lottery">Loterias</button>
+          <button class="tab" id="tabNumbers" type="button" role="tab" aria-selected="false" data-mode="numbers">Números</button>
+          <button class="tab" id="tabLottery" type="button" role="tab" aria-selected="false" data-mode="lottery">Loterias Caixa</button>
         </div>
 
         <div class="field-grid">
           <div class="field">
-            <label for="drawTitle">Sorteio</label>
+            <label for="drawTitle">Nome do sorteio</label>
             <input id="drawTitle" value="Sorteio Inteligente" autocomplete="off">
           </div>
           <div class="field">
             <label for="organizerName">Organizador</label>
-            <input id="organizerName" value="Ademir AgÃªncia" autocomplete="off">
+            <input id="organizerName" value="Ademir Agência" autocomplete="off">
           </div>
         </div>
 
@@ -928,13 +1359,13 @@
           </div>
           <div class="checks">
             <label class="check"><input id="dedupeNames" type="checkbox" checked>Remover duplicados</label>
-            <label class="check"><input id="smartCaseNames" type="checkbox" checked>Capitalizar nomes</label>
+            <label class="check"><input id="smartCaseNames" type="checkbox" checked>Padronizar nomes</label>
           </div>
           <div class="metric-row">
-            <div class="metric"><strong id="rawNameMetric">0</strong><span>linhas</span></div>
-            <div class="metric"><strong id="validNameMetric">0</strong><span>vÃ¡lidos</span></div>
+            <div class="metric"><strong id="rawNameMetric">0</strong><span>informados</span></div>
+            <div class="metric"><strong id="validNameMetric">0</strong><span>válidos</span></div>
             <div class="metric"><strong id="duplicateNameMetric">0</strong><span>duplicados</span></div>
-            <div class="metric"><strong id="requestNameMetric">1</strong><span>solicitados</span></div>
+            <div class="metric"><strong id="requestNameMetric">1</strong><span>resultados</span></div>
           </div>
           <div class="alerts" id="nameAlerts"></div>
           <div class="quick-actions">
@@ -943,14 +1374,14 @@
           </div>
         </section>
 
-        <section class="mode-panel" id="numbersPanel" aria-label="Sorteio por nÃºmeros">
+        <section class="mode-panel" id="numbersPanel" aria-label="Sorteio por números">
           <div class="field-grid">
             <div class="field">
-              <label for="minNumber">NÃºmero inicial</label>
+              <label for="minNumber">Número inicial</label>
               <input id="minNumber" type="number" value="1">
             </div>
             <div class="field">
-              <label for="maxNumber">NÃºmero final</label>
+              <label for="maxNumber">Número final</label>
               <input id="maxNumber" type="number" value="100">
             </div>
             <div class="field">
@@ -963,22 +1394,22 @@
             </div>
           </div>
           <div class="field full">
-            <label for="excludedNumbers">Excluir nÃºmeros</label>
+            <label for="excludedNumbers">Excluir números</label>
             <input id="excludedNumbers" placeholder="Ex.: 4, 13, 22">
           </div>
           <div class="checks">
-            <label class="check"><input id="padNumbers" type="checkbox" checked>Usar zero Ã  esquerda</label>
+            <label class="check"><input id="padNumbers" type="checkbox" checked>Zero à esquerda</label>
             <label class="check"><input id="sortNumbers" type="checkbox" checked>Ordenar resultado</label>
           </div>
           <div class="metric-row">
-            <div class="metric"><strong id="rangeMetric">100</strong><span>no intervalo</span></div>
-            <div class="metric"><strong id="excludedMetric">0</strong><span>excluÃ­dos</span></div>
-            <div class="metric"><strong id="availableMetric">100</strong><span>disponÃ­veis</span></div>
-            <div class="metric"><strong id="requestNumberMetric">1</strong><span>solicitados</span></div>
+            <div class="metric"><strong id="rangeMetric">100</strong><span>intervalo</span></div>
+            <div class="metric"><strong id="excludedMetric">0</strong><span>excluídos</span></div>
+            <div class="metric"><strong id="availableMetric">100</strong><span>disponíveis</span></div>
+            <div class="metric"><strong id="requestNumberMetric">1</strong><span>resultados</span></div>
           </div>
           <div class="alerts" id="numberAlerts"></div>
           <div class="quick-actions">
-            <button class="button primary" id="drawNumbersButton" type="button"><svg class="icon" viewBox="0 0 24 24"><path d="M8 3h8"></path><path d="M12 3v18"></path><path d="M5 8h14"></path><path d="M5 16h14"></path></svg>Sortear nÃºmeros</button>
+            <button class="button primary" id="drawNumbersButton" type="button"><svg class="icon" viewBox="0 0 24 24"><path d="M8 3h8"></path><path d="M12 3v18"></path><path d="M5 8h14"></path><path d="M5 16h14"></path></svg>Sortear números</button>
             <button class="button" id="clearNumbersButton" type="button"><svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6v14"></path><path d="M16 6v14"></path><path d="M10 3h4"></path></svg>Limpar</button>
           </div>
         </section>
@@ -990,15 +1421,15 @@
               <select id="lotteryGame"></select>
             </div>
             <div class="field">
-              <label for="lotteryBetCount">Quantidade de palpites</label>
+              <label for="lotteryBetCount">Número de palpites</label>
               <input id="lotteryBetCount" type="number" min="1" max="20" value="5">
             </div>
             <div class="field">
-              <label for="lotteryPickCount">Dezenas por palpite</label>
+              <label for="lotteryPickCount">Dezenas por jogo</label>
               <input id="lotteryPickCount" type="number" min="1" value="6">
             </div>
             <div class="field">
-              <label for="lotteryStrategy">EstratÃ©gia</label>
+              <label for="lotteryStrategy">Estratégia</label>
               <select id="lotteryStrategy">
                 <option value="balanced">Equilibrada</option>
                 <option value="spread">Espalhada</option>
@@ -1048,11 +1479,11 @@
               </svg>
             </div>
             <h2 class="visual-title">Pronto para sortear</h2>
-            <p class="visual-copy">Escolha o modo, confira os dados e gere um resultado com histÃ³rico local, auditoria e compartilhamento.</p>
+            <p class="visual-copy">Configure os dados, execute o sorteio e compartilhe o comprovante.</p>
             <div class="status-strip">
               <div class="status-card"><strong id="statusMode">Nomes</strong><span>modo ativo</span></div>
-              <div class="status-card"><strong id="statusEngine">Crypto</strong><span>motor aleatÃ³rio</span></div>
-              <div class="status-card"><strong id="statusHistory">0</strong><span>no histÃ³rico</span></div>
+              <div class="status-card"><strong id="statusEngine">Seguro</strong><span>aleatório</span></div>
+              <div class="status-card"><strong id="statusHistory">0</strong><span>no histórico</span></div>
             </div>
           </div>
         </div>
@@ -1092,7 +1523,7 @@
 
     <section class="panel history-panel">
       <div class="history-top">
-        <h2>HistÃ³rico</h2>
+        <h2>Histórico de sorteios</h2>
         <div class="quick-actions">
           <button class="button" id="exportHistoryButton" type="button"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>Exportar</button>
           <button class="button" id="clearHistoryButton" type="button"><svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6v14"></path><path d="M16 6v14"></path><path d="M10 3h4"></path></svg>Limpar</button>
@@ -1104,14 +1535,14 @@
 
   <div class="modal" id="donationModal" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="donationTitle">
-      <h2 id="donationTitle">Apoiar o projeto</h2>
-      <p class="visual-copy">DoaÃ§Ã£o opcional via Pix para ajudar a manter e melhorar o sorteador.</p>
+      <h2 id="donationTitle">Apoiar com Pix</h2>
+      <p class="visual-copy">A doação é opcional e ajuda a manter o projeto em evolução.</p>
       <div class="pix-box">
         <span>Chave Pix</span>
         <code id="pixKey">ademirtrafegoads@gmail.com</code>
       </div>
       <div class="quick-actions">
-        <button class="button primary" id="copyPixButton" type="button"><svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"></rect><rect x="2" y="2" width="13" height="13" rx="2"></rect></svg>Copiar Pix</button>
+        <button class="button primary" id="copyPixButton" type="button"><svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"></rect><rect x="2" y="2" width="13" height="13" rx="2"></rect></svg>Copiar chave Pix</button>
         <button class="button" id="closeDonationButton" type="button">Fechar</button>
       </div>
     </div>
@@ -1127,14 +1558,14 @@
     const LOTTERIES = {
       mega: { label: "Mega-Sena", min: 1, max: 60, pick: 6, short: "Mega" },
       quina: { label: "Quina", min: 1, max: 80, pick: 5, short: "Quina" },
-      lotofacil: { label: "LotofÃ¡cil", min: 1, max: 25, pick: 15, short: "FÃ¡cil" },
+      lotofacil: { label: "Lotofácil", min: 1, max: 25, pick: 15, short: "Fácil" },
       lotomania: { label: "Lotomania", min: 0, max: 99, pick: 50, short: "Mania" },
       dupla: { label: "Dupla Sena", min: 1, max: 50, pick: 6, short: "Dupla" },
       timemania: { label: "Timemania", min: 1, max: 80, pick: 10, short: "Time" },
       dia: { label: "Dia de Sorte", min: 1, max: 31, pick: 7, short: "Dia" }
     };
 
-    const MONTHS = ["Janeiro", "Fevereiro", "MarÃ§o", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const MONTHS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
     const els = {};
     [
@@ -1250,7 +1681,7 @@
       els.requestNameMetric.textContent = requested || 0;
       const messages = [];
       if (parsed.duplicates.length && els.dedupeNames.checked) messages.push(`${parsed.duplicates.length} duplicado(s) removidos automaticamente.`);
-      if (requested > parsed.values.length && parsed.values.length) messages.push("A quantidade solicitada passa do total disponÃ­vel.");
+      if (requested > parsed.values.length && parsed.values.length) messages.push("A quantidade solicitada passa do total disponível.");
       alert(els.nameAlerts, messages);
     }
 
@@ -1263,8 +1694,8 @@
       els.availableMetric.textContent = data.pool.length;
       els.requestNumberMetric.textContent = requested || 0;
       const messages = [];
-      if (data.max < data.min) messages.push("O nÃºmero final precisa ser maior ou igual ao inicial.");
-      if (requested > data.pool.length && data.pool.length) messages.push("A quantidade solicitada passa do total disponÃ­vel.");
+      if (data.max < data.min) messages.push("O número final precisa ser maior ou igual ao inicial.");
+      if (requested > data.pool.length && data.pool.length) messages.push("A quantidade solicitada passa do total disponível.");
       alert(els.numberAlerts, messages);
     }
 
@@ -1280,8 +1711,8 @@
       els.lotteryPickMetric.textContent = pick;
       els.lotteryBetMetric.textContent = bets;
       els.lotteryRuleMetric.textContent = game.short;
-      const messages = ["Palpites nÃ£o garantem prÃªmio; use como sugestÃ£o de combinaÃ§Ã£o."];
-      if (pick < 1 || pick > (game.max - game.min + 1)) messages.push("A quantidade de dezenas estÃ¡ fora do limite do jogo.");
+      const messages = ["Palpites não garantem prêmio; use como sugestão de combinação."];
+      if (pick < 1 || pick > (game.max - game.min + 1)) messages.push("A quantidade de dezenas está fora do limite do jogo.");
       alert(els.lotteryAlerts, messages);
     }
 
@@ -1290,7 +1721,7 @@
       document.querySelectorAll(".tab").forEach((tab) => tab.setAttribute("aria-selected", String(tab.dataset.mode === nextMode)));
       document.querySelectorAll(".mode-panel").forEach((panel) => panel.classList.remove("active"));
       document.getElementById(`${nextMode}Panel`).classList.add("active");
-      els.statusMode.textContent = nextMode === "names" ? "Nomes" : nextMode === "numbers" ? "NÃºmeros" : "Loterias";
+      els.statusMode.textContent = nextMode === "names" ? "Nomes" : nextMode === "numbers" ? "Números" : "Loterias";
     }
 
     function startRolling(text) {
@@ -1315,7 +1746,7 @@
         type,
         label,
         title: els.drawTitle.value.trim() || "Sorteio Inteligente",
-        organizer: els.organizerName.value.trim() || "Ademir AgÃªncia",
+        organizer: els.organizerName.value.trim() || "Ademir Agência",
         createdAt: now.toISOString(),
         winners,
         alternates,
@@ -1374,18 +1805,18 @@
       const alternatesAmount = Math.max(0, Number(els.numberAlternateCount.value) || 0);
       const total = winnersAmount + alternatesAmount;
       if (data.pool.length < total) {
-        showToast("NÃºmeros insuficientes.");
+        showToast("Números insuficientes.");
         updateNumberMetrics();
         return;
       }
-      startRolling("Sorteando nÃºmeros...");
+      startRolling("Sorteando números...");
       await delay(650);
       let selected = sample(data.pool, total);
       if (els.sortNumbers.checked) selected = selected.sort((a, b) => a - b);
       const maxAbs = Math.max(Math.abs(data.min), Math.abs(data.max));
       const formatted = selected.map((value) => els.padNumbers.checked ? pad(value, maxAbs) : String(value));
-      const result = createResult("numbers", "Sorteio por nÃºmeros", formatted.slice(0, winnersAmount), formatted.slice(winnersAmount), data.pool.length, {
-        intervalo: `${data.min} atÃ© ${data.max}`,
+      const result = createResult("numbers", "Sorteio por números", formatted.slice(0, winnersAmount), formatted.slice(winnersAmount), data.pool.length, {
+        intervalo: `${data.min} até ${data.max}`,
         excluidos: data.excluded.size
       });
       renderResult(result);
@@ -1430,7 +1861,7 @@
         let bet = makeLotteryBet(game, pick, els.lotteryStrategy.value);
         if (els.lotterySorted.checked) bet = bet.sort((a, b) => a - b);
         let text = bet.map((value) => pad(value, game.max)).join(" ");
-        if (els.lotteryGame.value === "dia") text += ` | MÃªs: ${MONTHS[randomInt(MONTHS.length)]}`;
+        if (els.lotteryGame.value === "dia") text += ` | Mês: ${MONTHS[randomInt(MONTHS.length)]}`;
         winners.push(`Jogo ${index + 1}: ${text}`);
       }
       const result = createResult("lottery", game.label, winners, [], universe, {
@@ -1512,14 +1943,14 @@
     function renderHistory() {
       els.statusHistory.textContent = history.length;
       if (!history.length) {
-        els.historyList.innerHTML = `<div class="empty">O histÃ³rico aparecerÃ¡ depois do primeiro sorteio.</div>`;
+        els.historyList.innerHTML = `<div class="empty">O histórico aparecerá depois do primeiro sorteio.</div>`;
         return;
       }
       els.historyList.innerHTML = history.map((item) => `
         <button class="history-item" type="button" data-history="${escapeHtml(item.id)}">
           <strong>${escapeHtml(item.winners[0] || item.id)}</strong>
-          <span>${escapeHtml(item.label)} Â· ${escapeHtml(new Date(item.createdAt).toLocaleString("pt-BR"))}</span>
-          <span>${escapeHtml(item.id)} Â· ${escapeHtml(item.checksum)}</span>
+          <span>${escapeHtml(item.label)} · ${escapeHtml(new Date(item.createdAt).toLocaleString("pt-BR"))}</span>
+          <span>${escapeHtml(item.id)} · ${escapeHtml(item.checksum)}</span>
         </button>
       `).join("");
     }
@@ -1560,7 +1991,7 @@
         renderResult(result);
         showToast("Resultado carregado pelo link.");
       } catch {
-        showToast("Link de resultado invÃ¡lido.");
+        showToast("Link de resultado inválido.");
       }
     }
 
@@ -1597,7 +2028,7 @@
       copyText(url, "Link copiado.");
     });
     els.exportHistoryButton.addEventListener("click", () => {
-      if (!history.length) return showToast("HistÃ³rico vazio.");
+      if (!history.length) return showToast("Histórico vazio.");
       const rows = [["id", "tipo", "principal", "data", "hash"], ...history.map((item) => [item.id, item.type, item.winners[0] || "", item.createdAt, item.checksum])];
       download("historico-sorteador.csv", rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n"), "text/csv;charset=utf-8");
     });
@@ -1605,7 +2036,7 @@
       history = [];
       localStorage.removeItem(STORAGE_KEY);
       renderHistory();
-      showToast("HistÃ³rico limpo.");
+      showToast("Histórico limpo.");
     });
     els.historyList.addEventListener("click", (event) => {
       const button = event.target.closest("[data-history]");
